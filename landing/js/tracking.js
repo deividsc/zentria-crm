@@ -9,7 +9,7 @@
     // Configuration
     // =============================================
     const CONFIG = {
-        webhookUrl: 'http://136.115.7.41/webhook/lead-capture',
+        webhookUrl: 'http://136.115.7.41:5678/webhook/lead-capture',
         trackingPrefix: 'zentria_landing_'
     };
 

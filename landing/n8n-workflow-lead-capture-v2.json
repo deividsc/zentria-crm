@@ -1,0 +1,99 @@
+{
+  "name": "Zentria Lead Capture",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead-capture",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook-lead",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "zentria-lead"
+    },
+    {
+      "parameters": {
+        "url": "http://136.115.7.41/jsonrpc",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "jsonrpc",
+              "value": "2.0"
+            },
+            {
+              "name": "method",
+              "value": "call"
+            },
+            {
+              "name": "params",
+              "value": "={{ JSON.stringify({ service: 'object', method: 'execute_kw', args: ['zentria', 1, 'b898fe9dde24fe76d0456c65fcf64732be8604a3', 'crm.lead', 'create', [{ name: $json.nombre, email_from: $json.email, phone: $json.telefono, description: ($json.mensaje || '') + '\\nInterés: ' + ($json.interes || 'General') + '\\nUTM: ' + ($json.utm_source || '') + ' / ' + ($json.utm_medium || '') + ' / ' + ($json.utm_campaign || ''), tag_ids: [[5]] }] }) }}"
+            },
+            {
+              "name": "id",
+              "value": 1
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "odoo-create-lead",
+      "name": "Odoo Create Lead",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [500, 300],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "from": "noreply@zentria.com",
+        "to": "davidscuderi@hotmail.com",
+        "subject": "=?UTF-8?B?{{ $json.form_type === 'curso' ? 'Nueva inscripción al curso' : 'Nuevo Lead' }} - {{ $json.nombre }} =?=",
+        "text": "= ?UTF-8?B?{{\n  'DATOS DEL LEAD\\n' +\n  '==================\\n\\n' +\n  'Nombre: ' + $json.nombre + '\\n' +\n  'Email: ' + $json.email + '\\n' +\n  'Teléfono: ' + ($json.telefono || 'No proporcionado') + '\\n' +\n  'Empresa: ' + ($json.empresa || 'No proporcionada') + '\\n\\n' +\n  'Tipo: ' + ($json.form_type === 'contacto' ? 'Contacto' : 'Curso CRM') + '\\n' +\n  ($json.interes ? 'Interés: ' + $json.interes + '\\n' : '') +\n  ($json.mensaje ? '\\nMensaje:\\n' + $json.mensaje + '\\n' : '') +\n  '\\nTRACKING\\n' +\n  '===========\\n' +\n  'UTM Source: ' + ($json.utm_source || '-') + '\\n' +\n  'UTM Medium: ' + ($json.utm_medium || '-') + '\\n' +\n  'UTM Campaign: ' + ($json.utm_campaign || '-') + '\\n' +\n  'Sección: ' + ($json.seccion_origen || '-') + '\\n\\n' +\n  'Fecha: ' + new Date().toISOString()\n}}",
+        "options": {}
+      },
+      "id": "sendgrid-email",
+      "name": "SendGrid Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [750, 300],
+      "credentials": {
+        "emailSendgrid": "sendgrid-api"
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Odoo Create Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Odoo Create Lead": {
+      "main": [
+        [
+          {
+            "node": "SendGrid Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
