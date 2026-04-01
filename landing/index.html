@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zentria CRM - Transforma tu Negocio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="#" class="logo">Zentria</a>
+            <div class="nav-links">
+                <a href="#servicios">Servicios</a>
+                <a href="#precios">Precios</a>
+                <a href="#curso">Curso</a>
+                <a href="#contacto" class="btn btn-primary">Comenzar</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="hero" class="hero" data-section="hero">
+        <div class="container">
+            <h1>Gestiona tus clientes como un profesional</h1>
+            <p class="subtitle">CRM completo con automatización y análisis en un solo lugar. Ideal para empresas que quieren crecer.</p>
+            <div class="hero-badges">
+                <span class="badge">✓ CRM Completo</span>
+                <span class="badge">✓ Automatizaciones</span>
+                <span class="badge">✓ Soporte 24/7</span>
+            </div>
+            <a href="#contacto" class="btn btn-large btn-primary" data-track="hero-cta">Solicitar Demo</a>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="servicios" class="services" data-section="servicios">
+        <div class="container">
+            <h2>Nuestros Servicios</h2>
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-icon">📊</div>
+                    <h3>Gestión de Leads</h3>
+                    <p>Captura, organiza y nurturing de prospectos automáticamente.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">🤖</div>
+                    <h3>Automatizaciones</h3>
+                    <p>Workflows inteligentes que ahorran horas de trabajo manual.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">📧</div>
+                    <h3>Email Marketing</h3>
+                    <p>Campañas personalizadas con seguimiento de métricas.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">📈</div>
+                    <h3>Reporting</h3>
+                    <p>Dashboards en tiempo real para tomar mejores decisiones.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="precios" class="pricing" data-section="precios">
+        <div class="container">
+            <h2>Planes para Cada Necesidad</h2>
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <h3>Básico</h3>
+                    <div class="price">$99<span>/mes</span></div>
+                    <ul class="features">
+                        <li>✓ 5 usuarios</li>
+                        <li>✓ 1,000 leads</li>
+                        <li>✓ 5 automatizaciones</li>
+                        <li>✓ Email soporte</li>
+                    </ul>
+                    <button class="btn btn-outline" data-plan="basico" data-track="precio-basico">Elegir Plan</button>
+                </div>
+                <div class="pricing-card featured">
+                    <div class="badge">Popular</div>
+                    <h3>Avanzado</h3>
+                    <div class="price">$249<span>/mes</span></div>
+                    <ul class="features">
+                        <li>✓ 15 usuarios</li>
+                        <li>✓ 10,000 leads</li>
+                        <li>✓ Automatizaciones ilimitadas</li>
+                        <li>✓ IA incluida</li>
+                        <li>✓ Soporte prioritario</li>
+                    </ul>
+                    <button class="btn btn-primary" data-plan="avanzado" data-track="precio-avanzado">Elegir Plan</button>
+                </div>
+                <div class="pricing-card">
+                    <h3>Enterprise</h3>
+                    <div class="price">$599<span>/mes</span></div>
+                    <ul class="features">
+                        <li>✓ Usuarios ilimitados</li>
+                        <li>✓ Leads ilimitados</li>
+                        <li>✓ Integraciones custom</li>
+                        <li>✓ SLA dedicado</li>
+                        <li>✓ Onboarding incluido</li>
+                    </ul>
+                    <button class="btn btn-outline" data-plan="enterprise" data-track="precio-enterprise">Contactar</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Course Section -->
+    <section id="curso" class="course" data-section="curso">
+        <div class="container">
+            <h2>🎓 Curso Exclusivo de CRM</h2>
+            <p class="course-description">Aprende a sacar el máximo provecho de tu CRM con nuestro curso intensivo.</p>
+            
+            <div class="course-content">
+                <div class="course-features">
+                    <div class="course-feature">
+                        <span class="check">✓</span>
+                        <span>Introducción al CRM</span>
+                    </div>
+                    <div class="course-feature">
+                        <span class="check">✓</span>
+                        <span>Configuración básica</span>
+                    </div>
+                    <div class="course-feature">
+                        <span class="check">✓</span>
+                        <span>Automatizaciones paso a paso</span>
+                    </div>
+                    <div class="course-feature">
+                        <span class="check">✓</span>
+                        <span>Reporting y métricas</span>
+                    </div>
+                    <div class="course-feature">
+                        <span class="check">✓</span>
+                        <span>Best practices del industry</span>
+                    </div>
+                </div>
+                
+                <div class="course-form">
+                    <h3>¡Inscríbete Gratis!</h3>
+                    <form id="course-form" data-form-type="curso">
+                        <input type="text" name="nombre" placeholder="Tu nombre" required>
+                        <input type="email" name="email" placeholder="Tu email" required>
+                        <input type="tel" name="telefono" placeholder="Teléfono (opcional)">
+                        <button type="submit" class="btn btn-large btn-primary" data-track="curso-inscripcion">Inscribirme</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact/Lead Form Section -->
+    <section id="contacto" class="contact" data-section="contacto">
+        <div class="container">
+            <h2>¿Listo para Comenzar?</h2>
+            <p>Completa el formulario y nos pondremos en contacto contigo.</p>
+            
+            <form id="contact-form" data-form-type="contacto">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nombre">Nombre completo</label>
+                        <input type="text" id="nombre" name="nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="empresa">Empresa</label>
+                        <input type="text" id="empresa" name="empresa">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="telefono">Teléfono</label>
+                        <input type="tel" id="telefono" name="telefono">
+                    </div>
+                </div>
+                <div class="form-group full">
+                    <label for="interes">¿Qué te interesa?</label>
+                    <select id="interes" name="interes">
+                        <option value="">Seleccionar...</option>
+                        <option value="basico">Plan Básico</option>
+                        <option value="avanzado">Plan Avanzado</option>
+                        <option value="enterprise">Plan Enterprise</option>
+                        <option value="curso">Curso de CRM</option>
+                        <option value="general">Información general</option>
+                    </select>
+                </div>
+                <div class="form-group full">
+                    <label for="mensaje">Mensaje (opcional)</label>
+                    <textarea id="mensaje" name="mensaje" rows="4"></textarea>
+                </div>
+                <input type="hidden" id="utm_source" name="utm_source">
+                <input type="hidden" id="utm_medium" name="utm_medium">
+                <input type="hidden" id="utm_campaign" name="utm_campaign">
+                <input type="hidden" id="utm_content" name="utm_content">
+                <input type="hidden" id="seccion_origen" name="seccion_origen">
+                <button type="submit" class="btn btn-large btn-primary" data-track="contacto-enviar">Enviar</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Payment Section (Mockup) -->
+    <section id="pago" class="payment" data-section="pago">
+        <div class="container">
+            <h2>Métodos de Pago</h2>
+            <p>Procesamos tus pagos de forma segura</p>
+            <div class="payment-methods">
+                <div class="payment-method">
+                    <span class="card-icon">💳</span>
+                    <span>Tarjeta de Crédito</span>
+                </div>
+                <div class="payment-method">
+                    <span class="card-icon">🏦</span>
+                    <span>Transferencia Bancaria</span>
+                </div>
+                <div class="payment-method">
+                    <span class="card-icon">📱</span>
+                    <span>MercadoPago</span>
+                </div>
+            </div>
+            <p class="secure-notice">🔒 Todos los pagos son procesados de forma segura con encriptación SSL</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Zentria CRM. Todos los derechos reservados.</p>
+            <p>Contacto: info@zentria.com | +54 11 1234-5678</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/tracking.js"></script>
+</body>
+</html>
