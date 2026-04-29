@@ -19,6 +19,9 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - default
+      - zentria-net
 
   redis:
     image: redis:7-alpine
@@ -65,3 +68,8 @@ services:
 volumes:
   postgres_data:
   redis_data:
+
+networks:
+  default: {}
+  zentria-net:
+    external: true

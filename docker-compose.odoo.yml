@@ -1,0 +1,68 @@
+services:
+  odoo:
+    image: odoo:17.0
+    depends_on:
+      odoo-postgres:
+        condition: service_healthy
+    ports:
+      - "8069:8069"
+    volumes:
+      - odoo_data:/var/lib/odoo
+      - ./odoo/addons:/mnt/extra-addons
+    environment:
+      HOST: odoo-postgres
+      USER: ${ODOO_DB_USER:-odoo}
+      PASSWORD: ${ODOO_DB_PASSWORD}
+    networks:
+      - zentria-net
+      - odoo-internal
+    restart: unless-stopped
+
+  odoo-postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${ODOO_DB_NAME:-odoo}
+      POSTGRES_USER: ${ODOO_DB_USER:-odoo}
+      POSTGRES_PASSWORD: ${ODOO_DB_PASSWORD}
+    volumes:
+      - odoo_postgres_data:/var/lib/postgresql/data
+    networks:
+      - odoo-internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${ODOO_DB_USER:-odoo}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  n8n:
+    image: n8nio/n8n:latest
+    depends_on:
+      - odoo
+    ports:
+      - "5678:5678"
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./n8n-workflows:/workflows:ro
+    environment:
+      N8N_BASIC_AUTH_ACTIVE: "true"
+      N8N_BASIC_AUTH_USER: ${N8N_BASIC_AUTH_USER:-admin}
+      N8N_BASIC_AUTH_PASSWORD: ${N8N_BASIC_AUTH_PASSWORD}
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
+      GENERIC_TIMEZONE: ${N8N_TIMEZONE:-Europe/Madrid}
+      DB_TYPE: sqlite
+    networks:
+      - zentria-net
+      - odoo-internal
+    restart: unless-stopped
+
+volumes:
+  odoo_data:
+  odoo_postgres_data:
+  n8n_data:
+
+networks:
+  zentria-net:
+    external: true
+  odoo-internal:
+    driver: bridge
