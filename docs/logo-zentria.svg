@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="200" height="60">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#6366F1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8B5CF6;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Icono: Z estilizada con nodos conectados (representa red/ia/conexiones) -->
+  <g transform="translate(10, 10)">
+    <!-- Nodo central superior -->
+    <circle cx="20" cy="8" r="4" fill="url(#grad1)"/>
+    <!-- Nodo inferior izquierdo -->
+    <circle cx="8" cy="32" r="3" fill="#6366F1" opacity="0.7"/>
+    <!-- Nodo inferior derecho -->
+    <circle cx="32" cy="32" r="3" fill="#8B5CF6" opacity="0.7"/>
+    <!-- Conexiones -->
+    <line x1="20" y1="12" x2="10" y2="30" stroke="#6366F1" stroke-width="1.5" opacity="0.5"/>
+    <line x1="20" y1="12" x2="30" y2="30" stroke="#8B5CF6" stroke-width="1.5" opacity="0.5"/>
+    <line x1="10" y1="32" x2="30" y2="32" stroke="#6366F1" stroke-width="1.5" opacity="0.3"/>
+    <!-- Z estilizada -->
+    <path d="M12 14 L28 14 L12 28 L28 28" fill="none" stroke="url(#grad1)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  
+  <!-- Texto Zentria -->
+  <text x="55" y="40" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="32" font-weight="700" fill="#1E293B">
+    <tspan fill="url(#grad1)">Z</tspan>entria
+  </text>
+</svg>

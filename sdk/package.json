@@ -1,0 +1,35 @@
+{
+  "name": "@zentria/tracking-sdk",
+  "version": "0.1.0",
+  "description": "Lightweight tracking SDK for Zentria landings",
+  "main": "dist/sdk.cjs.js",
+  "module": "dist/sdk.esm.js",
+  "browser": "dist/sdk.iife.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "jsdom": "^24.0.0",
+    "rollup": "^4.14.0",
+    "tslib": "^2.6.2",
+    "typescript": "^5.4.5",
+    "vitest": "^1.5.0"
+  },
+  "keywords": [
+    "tracking",
+    "analytics",
+    "sdk"
+  ],
+  "license": "MIT"
+}

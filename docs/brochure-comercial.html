@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zentria — Captación Inteligente con IA</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #1E293B;
+            line-height: 1.6;
+            font-size: 11pt;
+        }
+        
+        /* Page Breaks */
+        .page-break {
+            page-break-after: always;
+        }
+        
+        /* Cover */
+        .cover {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: linear-gradient(135deg, #1E293B 0%, #334155 100%);
+            color: white;
+            padding: 40px;
+        }
+        
+        .cover-logo {
+            margin-bottom: 60px;
+        }
+        
+        .cover h1 {
+            font-size: 42pt;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #818CF8, #A78BFA);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .cover h2 {
+            font-size: 18pt;
+            font-weight: 400;
+            color: #CBD5E1;
+            margin-bottom: 40px;
+            max-width: 500px;
+        }
+        
+        .cover-badge {
+            background: rgba(129, 140, 248, 0.2);
+            border: 1px solid rgba(129, 140, 248, 0.4);
+            padding: 10px 24px;
+            border-radius: 50px;
+            font-size: 10pt;
+            color: #A78BFA;
+        }
+        
+        /* Sections */
+        section {
+            padding: 60px 50px;
+            min-height: 100vh;
+        }
+        
+        .section-title {
+            font-size: 28pt;
+            font-weight: 700;
+            color: #0F172A;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        
+        .section-subtitle {
+            font-size: 14pt;
+            color: #64748B;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        /* Problem Section */
+        .problem-section {
+            background: #F8FAFC;
+        }
+        
+        .problem-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .problem-card {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+        
+        .problem-card .emoji {
+            font-size: 36pt;
+            margin-bottom: 15px;
+        }
+        
+        .problem-card h3 {
+            font-size: 14pt;
+            color: #0F172A;
+            margin-bottom: 10px;
+        }
+        
+        .problem-card p {
+            color: #64748B;
+            font-size: 10pt;
+        }
+        
+        /* Stats */
+        .stats-row {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            padding: 30px;
+            background: linear-gradient(90deg, #6366F1, #8B5CF6);
+            border-radius: 16px;
+            color: white;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 28pt;
+            font-weight: 800;
+        }
+        
+        .stat-label {
+            font-size: 9pt;
+            opacity: 0.9;
+        }
+        
+        /* Solution Section */
+        .solution-section {
+            background: white;
+        }
+        
+        .solution-highlight {
+            background: linear-gradient(135deg, #EEF2FF, #E0E7FF);
+            padding: 40px;
+            border-radius: 20px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        
+        .solution-highlight h3 {
+            font-size: 18pt;
+            color: #4338CA;
+            margin-bottom: 15px;
+        }
+        
+        .solution-highlight p {
+            color: #4F46E5;
+            font-size: 11pt;
+        }
+        
+        .feature-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            padding: 20px;
+            background: #F8FAFC;
+            border-radius: 12px;
+        }
+        
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #6366F1, #8B5CF6);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16pt;
+            flex-shrink: 0;
+        }
+        
+        .feature-text h4 {
+            font-size: 12pt;
+            color: #0F172A;
+            margin-bottom: 5px;
+        }
+        
+        .feature-text p {
+            font-size: 9pt;
+            color: #64748B;
+        }
+        
+        /* Comparison Table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            font-size: 9pt;
+        }
+        
+        .comparison-table th {
+            background: #1E293B;
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+        
+        .comparison-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #E2E8F0;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background: #F8FAFC;
+        }
+        
+        .check {
+            color: #10B981;
+            font-weight: bold;
+        }
+        
+        .cross {
+            color: #EF4444;
+        }
+        
+        /* How it works */
+        .how-section {
+            background: #F8FAFC;
+        }
+        
+        .steps-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        .steps-container::before {
+            content: '';
+            position: absolute;
+            top: 40px;
+            left: 80px;
+            right: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, #6366F1, #8B5CF6);
+            z-index: 0;
+        }
+        
+        .step {
+            text-align: center;
+            flex: 1;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .step-number {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #6366F1, #8B5CF6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24pt;
+            font-weight: 800;
+            margin: 0 auto 20px;
+        }
+        
+        .step h4 {
+            font-size: 12pt;
+            color: #0F172A;
+            margin-bottom: 10px;
+        }
+        
+        .step p {
+            font-size: 9pt;
+            color: #64748B;
+            max-width: 200px;
+            margin: 0 auto;
+        }
+        
+        /* Flow Diagram */
+        .flow-diagram {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .flow-box {
+            padding: 15px 20px;
+            border-radius: 10px;
+            font-size: 9pt;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        .flow-box.primary {
+            background: linear-gradient(135deg, #6366F1, #8B5CF6);
+            color: white;
+        }
+        
+        .flow-box.secondary {
+            background: #EEF2FF;
+            color: #4338CA;
+        }
+        
+        .flow-arrow {
+            color: #CBD5E1;
+            font-size: 18pt;
+        }
+        
+        /* Benefits */
+        .benefits-section {
+            background: white;
+        }
+        
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .benefit-card {
+            text-align: center;
+            padding: 30px 20px;
+            background: #F8FAFC;
+            border-radius: 16px;
+        }
+        
+        .benefit-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #6366F1, #8B5CF6);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24pt;
+        }
+        
+        .benefit-card h4 {
+            font-size: 12pt;
+            color: #0F172A;
+            margin-bottom: 10px;
+        }
+        
+        .benefit-card p {
+            font-size: 9pt;
+            color: #64748B;
+        }
+        
+        /* ROI Box */
+        .roi-box {
+            background: linear-gradient(135deg, #0F172A, #1E293B);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+        }
+        
+        .roi-box h3 {
+            font-size: 16pt;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .roi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+        
+        .roi-item {
+            text-align: center;
+        }
+        
+        .roi-value {
+            font-size: 20pt;
+            font-weight: 700;
+            color: #A78BFA;
+        }
+        
+        .roi-label {
+            font-size: 8pt;
+            opacity: 0.8;
+        }
+        
+        /* Use Cases */
+        .usecases-section {
+            background: #F8FAFC;
+        }
+        
+        .usecase-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+        }
+        
+        .usecase-card {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+        }
+        
+        .usecase-card h4 {
+            font-size: 13pt;
+            color: #0F172A;
+            margin-bottom: 15px;
+        }
+        
+        .usecase-card ul {
+            list-style: none;
+            font-size: 9pt;
+            color: #64748B;
+        }
+        
+        .usecase-card li {
+            margin-bottom: 8px;
+            padding-left: 15px;
+            position: relative;
+        }
+        
+        .usecase-card li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: #6366F1;
+        }
+        
+        /* Pricing */
+        .pricing-section {
+            background: white;
+        }
+        
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+        }
+        
+        .pricing-card {
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
+        .pricing-card.featured {
+            border: 2px solid #6366F1;
+            transform: scale(1.02);
+        }
+        
+        .pricing-header {
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .pricing-card.featured .pricing-header {
+            background: linear-gradient(135deg, #6366F1, #8B5CF6);
+            color: white;
+        }
+        
+        .pricing-header h4 {
+            font-size: 14pt;
+            margin-bottom: 10px;
+        }
+        
+        .pricing-price {
+            font-size: 28pt;
+            font-weight: 800;
+        }
+        
+        .pricing-price span {
+            font-size: 11pt;
+            font-weight: 400;
+        }
+        
+        .pricing-features {
+            padding: 30px;
+            background: #F8FAFC;
+        }
+        
+        .pricing-features ul {
+            list-style: none;
+            font-size: 9pt;
+        }
+        
+        .pricing-features li {
+            padding: 8px 0;
+            border-bottom: 1px solid #E2E8F0;
+        }
+        
+        .pricing-features li:last-child {
+            border-bottom: none;
+        }
+        
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, #1E293B, #334155);
+            color: white;
+            text-align: center;
+        }
+        
+        .cta-section h2 {
+            font-size: 28pt;
+            margin-bottom: 20px;
+        }
+        
+        .cta-section p {
+            font-size: 12pt;
+            opacity: 0.8;
+            margin-bottom: 40px;
+        }
+        
+        .cta-steps {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 50px;
+        }
+        
+        .cta-step {
+            text-align: center;
+        }
+        
+        .cta-step-number {
+            width: 50px;
+            height: 50px;
+            background: rgba(129, 140, 248, 0.3);
+            border: 2px solid #818CF8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-weight: 700;
+        }
+        
+        .cta-step p {
+            font-size: 9pt;
+            margin-bottom: 0;
+        }
+        
+        .cta-contact {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .cta-contact-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 11pt;
+        }
+        
+        .cta-badge {
+            display: inline-block;
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid #10B981;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 11pt;
+            color: #10B981;
+            font-weight: 600;
+        }
+        
+        /* Footer */
+        .footer {
+            background: #0F172A;
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .footer-logo {
+            margin-bottom: 20px;
+        }
+        
+        .footer p {
+            font-size: 9pt;
+            color: #94A3B8;
+        }
+        
+        .footer-company {
+            margin-top: 15px;
+            font-size: 8pt;
+            color: #64748B;
+        }
+        
+        @media print {
+            .page-break {
+                page-break-after: always;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- COVER PAGE -->
+<div class="cover">
+    <div class="cover-logo">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="180" height="54">
+            <defs>
+                <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:#818CF8;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#A78BFA;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <g transform="translate(10, 10)">
+                <circle cx="20" cy="8" r="4" fill="url(#grad1)"/>
+                <circle cx="8" cy="32" r="3" fill="#818CF8" opacity="0.7"/>
+                <circle cx="32" cy="32" r="3" fill="#A78BFA" opacity="0.7"/>
+                <line x1="20" y1="12" x2="10" y2="30" stroke="#818CF8" stroke-width="1.5" opacity="0.5"/>
+                <line x1="20" y1="12" x2="30" y2="30" stroke="#A78BFA" stroke-width="1.5" opacity="0.5"/>
+                <line x1="10" y1="32" x2="30" y2="32" stroke="#818CF8" stroke-width="1.5" opacity="0.3"/>
+                <path d="M12 14 L28 14 L12 28 L28 28" fill="none" stroke="url(#grad1)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
+            <text x="55" y="40" font-family="system-ui, -apple-system, sans-serif" font-size="32" font-weight="700" fill="#F8FAFC">
+                <tspan fill="url(#grad1)">Z</tspan>entria
+            </text>
+        </svg>
+    </div>
+    <h1>Convierte más alumnos<br>con inteligencia artificial</h1>
+    <h2>La plataforma que conecta tus landings, automatiza la captación y asigna leads a tu equipo comercial en segundos</h2>
+    <div class="cover-badge">Para empresas de formación en España</div>
+</div>
+
+<!-- PAGE 2: THE PROBLEM -->
+<section class="problem-section">
+    <h2 class="section-title">Tu academia pierde clientes todos los días</h2>
+    <p class="section-subtitle">El problema que vemos una y otra vez</p>
+    
+    <div class="problem-grid">
+        <div class="problem-card">
+            <div class="emoji">😰</div>
+            <h3>Los leads se enfrían</h3>
+            <p>El 78% de los formularios nunca reciben respuesta el mismo día. Tu cliente potencial ya encontró otra academia.</p>
+        </div>
+        <div class="problem-card">
+            <div class="emoji">😰</div>
+            <h3>No sabes quién está realmente interesado</h3>
+            <p>Inviertes el mismo tiempo en alguien que comparó precios que en alguien listo para matricularse.</p>
+        </div>
+        <div class="problem-card">
+            <div class="emoji">😰</div>
+            <h3>Tu equipo comercial persigue fantasmas</h3>
+            <p>Inbound calls, emails, WhatsApps... No hay forma clara de priorizar y tu mejor comercial pierde el tiempo.</p>
+        </div>
+        <div class="problem-card">
+            <div class="emoji">😰</div>
+            <h3>El seguimiento es caótico</h3>
+            <p>¿Qué pasó con ese lead de hace 2 semanas? ¿Le enviaste el programa? ¿Llamó?</p>
+        </div>
+    </div>
+    
+    <div class="stats-row">
+        <div class="stat-item">
+            <div class="stat-number">€3-8K</div>
+            <div class="stat-label">Perdidos por mes en leads sin contactar</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">40%</div>
+            <div class="stat-label">Del tiempo comercial en leads fríos</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">25-35%</div>
+            <div class="stat-label">Drop en conversión sin seguimiento</div>
+        </div>
+    </div>
+</section>
+
+<!-- PAGE 3: THE SOLUTION -->
+<section class="solution-section">
+    <h2 class="section-title">Zentria: Captación inteligente de principio a fin</h2>
+    
+    <div class="solution-highlight">
+        <h3>Tu equipo comercial solo habla con alumnos que realmente quieren matricularse</h3>
+        <p>Zentria conecta todas tus landings con un ecosistema de IA que intercepta, cualifica, enruta y asigna automáticamente.</p>
+    </div>
+    
+    <div class="feature-list">
+        <div class="feature-item">
+            <div class="feature-icon">🎯</div>
+            <div class="feature-text">
+                <h4>Intercepta cada lead</h4>
+                <p>WhatsApp automático en el momento justo, respuestas 24/7</p>
+            </div>
+        </div>
+        <div class="feature-item">
+            <div class="feature-icon">🧠</div>
+            <div class="feature-text">
+                <h4>Cualifica automáticamente</h4>
+                <p>Score de 0-100 según intención real de matrícula</p>
+            </div>
+        </div>
+        <div class="feature-item">
+            <div class="feature-icon">🔄</div>
+            <div class="feature-text">
+                <h4>Asigna al comercial óptimo</h4>
+                <p>Según disponibilidad, skill y carga de trabajo</p>
+            </div>
+        </div>
+        <div class="feature-item">
+            <div class="feature-icon">📊</div>
+            <div class="feature-text">
+                <h4>Enriquece con datos</h4>
+                <p>Comportamiento en landing + contexto para tu equipo</p>
+            </div>
+        </div>
+    </div>
+    
+    <table class="comparison-table" style="margin-top: 40px;">
+        <tr>
+            <th style="width: 40%;">Capacidad</th>
+            <th>Con Zentria</th>
+            <th>Sin Zentria</th>
+        </tr>
+        <tr>
+            <td>IA especializada en educación</td>
+            <td class="check">✓</td>
+            <td class="cross">—</td>
+        </tr>
+        <tr>
+            <td>Routing automático por tipo de lead</td>
+            <td class="check">✓</td>
+            <td class="cross">—</td>
+        </tr>
+        <tr>
+            <td>Scoring predictivo con datos reales</td>
+            <td class="check">✓</td>
+            <td class="cross">—</td>
+        </tr>
+        <tr>
+            <td>Dashboard con KPIs de captación</td>
+            <td class="check">✓</td>
+            <td class="cross">—</td>
+        </tr>
+        <tr>
+            <td>Integración directa con CRM</td>
+            <td class="check">✓</td>
+            <td class="cross">—</td>
+        </tr>
+    </table>
+</section>
+
+<!-- PAGE 4: HOW IT WORKS -->
+<section class="how-section">
+    <h2 class="section-title">Tres pasos para duplicar tu tasa de conversión</h2>
+    
+    <div class="steps-container">
+        <div class="step">
+            <div class="step-number">1</div>
+            <h4>Conecta tu landing</h4>
+            <p>Instalas nuestro script en 5 minutos. Sin desarrollo adicional.</p>
+        </div>
+        <div class="step">
+            <div class="step-number">2</div>
+            <h4>La IA cualifica</h4>
+            <p>Score, enruta y asigna automáticamente</p>
+        </div>
+        <div class="step">
+            <div class="step-number">3</div>
+            <h4>Tu comercial actúa</h4>
+            <p>Con todo el contexto, solo con leads hot</p>
+        </div>
+    </div>
+    
+    <div class="flow-diagram">
+        <div class="flow-box primary">Landing Page</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box secondary">Tracking SDK</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box primary">Orquestador IA</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box secondary">WhatsApp Bot</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box secondary">Scoring + Routing</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box secondary">CRM Injection</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box primary">Tu Comercial</div>
+    </div>
+    
+    <div style="margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+        <div class="problem-card">
+            <h3 style="font-size: 12pt; margin-bottom: 15px;">📱 Lead entra por formulario</h3>
+            <p style="font-size: 9pt; color: #64748B;">Se captura + WhatsApp de bienvenida automático</p>
+        </div>
+        <div class="problem-card">
+            <h3 style="font-size: 12pt; margin-bottom: 15px;">🤖 WhatsApp IA cualifica</h3>
+            <p style="font-size: 9pt; color: #64748B;">Preguntas: presupuesto, timing, intereses</p>
+        </div>
+        <div class="problem-card">
+            <h3 style="font-size: 12pt; margin-bottom: 15px;">📈 Scoring clasifica</h3>
+            <p style="font-size: 9pt; color: #64748B;">Hot / Warm / Cold + confidence score</p>
+        </div>
+        <div class="problem-card">
+            <h3 style="font-size: 12pt; margin-bottom: 15px;">👤 Assignment routing</h3>
+            <p style="font-size: 9pt; color: #64748B;">Comercial con menor carga + skill correcto</p>
+        </div>
+    </div>
+</section>
+
+<!-- PAGE 5: BENEFITS -->
+<section class="benefits-section">
+    <h2 class="section-title">Lo que ganas con Zentria</h2>
+    
+    <div class="benefits-grid">
+        <div class="benefit-card">
+            <div class="benefit-icon">⏱️</div>
+            <h4>40% menos tiempo</h4>
+            <p>En lead qualification. El equipo se enfoca en cerrar.</p>
+        </div>
+        <div class="benefit-card">
+            <div class="benefit-icon">📈</div>
+            <h4>2-3x más conversaciones</h4>
+            <p>Solo con leads que realmente quieren matricularse.</p>
+        </div>
+        <div class="benefit-card">
+            <div class="benefit-icon">📊</div>
+            <h4>Dashboard en tiempo real</h4>
+            <p>Métricas de captación, fuente y comercial.</p>
+        </div>
+        <div class="benefit-card">
+            <div class="benefit-icon">⚡</div>
+            <h4>Respuesta en <5 min</h4>
+            <p>vs 24h promedio de la industria.</p>
+        </div>
+        <div class="benefit-card">
+            <div class="benefit-icon">🎯</div>
+            <h4>78% accuracy</h4>
+            <p>En scoring de leads hot.</p>
+        </div>
+        <div class="benefit-card">
+            <div class="benefit-icon">💰</div>
+            <h4>8-12h/semana</h4>
+            <p>Recuperadas por comercial.</p>
+        </div>
+    </div>
+    
+    <div class="roi-box">
+        <h3>ROI típico (primeras 8 semanas)</h3>
+        <div class="roi-grid">
+            <div class="roi-item">
+                <div class="roi-value">€299</div>
+                <div class="roi-label">Inversión mensual Starter</div>
+            </div>
+            <div class="roi-item">
+                <div class="roi-value">35-50%</div>
+                <div class="roi-label">Reducción costo por lead</div>
+            </div>
+            <div class="roi-item">
+                <div class="roi-value">+15-25%</div>
+                <div class="roi-label">Mejora en matriculaciones</div>
+            </div>
+            <div class="roi-item">
+                <div class="roi-value">4-5 meses</div>
+                <div class="roi-label">Payback period</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PAGE 6: USE CASES -->
+<section class="usecases-section">
+    <h2 class="section-title">¿Para quién es Zentria?</h2>
+    
+    <div class="usecase-grid">
+        <div class="usecase-card">
+            <h4>🎓 Academias online</h4>
+            <ul>
+                <li>Múltiples landings por curso</li>
+                <li>Campañas Facebook/Google Ads</li>
+                <li>Leads por WhatsApp, email y formularios</li>
+                <li>Unifican todos los leads en un solo flujo</li>
+                <li>WhatsApp bot 24/7 para FAQ</li>
+            </ul>
+        </div>
+        <div class="usecase-card">
+            <h4>🏫 Centros presenciales</h4>
+            <ul>
+                <li>Equipos comerciales con llamadas</li>
+                <li>Necesitan priorizar atención</li>
+                <li>Scoring dice a quién llamar primero</li>
+                <li>Comercial llega con contexto</li>
+                <li>Menos "toma y daca" inicial</li>
+            </ul>
+        </div>
+        <div class="usecase-card">
+            <h4>🏢 B2B Education</h4>
+            <ul>
+                <li>Ventas más largas y complejas</li>
+                <li>Múltiples decisores</li>
+                <li>Tickets más altos</li>
+                <li>Lead scoring por cargo</li>
+                <li>Nurturing para leads fríos</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- PAGE 7: PRICING -->
+<section class="pricing-section">
+    <h2 class="section-title">Planes diseñados para crecer contigo</h2>
+    
+    <div class="pricing-grid">
+        <div class="pricing-card">
+            <div class="pricing-header">
+                <h4>STARTER</h4>
+                <div class="pricing-price">€299<span>/mes</span></div>
+            </div>
+            <div class="pricing-features">
+                <ul>
+                    <li>✓ 500 leads/mes</li>
+                    <li>✓ 1 landing conectada</li>
+                    <li>✓ WhatsApp Bot básico</li>
+                    <li>✓ Dashboard KPIs básico</li>
+                    <li>✓ Scoring modelo básico</li>
+                    <li>✓ 1 integración CRM</li>
+                    <li>✓ 1-3 comerciales</li>
+                    <li>✓ Soporte por email</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="pricing-card featured">
+            <div class="pricing-header">
+                <h4>PROFESSIONAL</h4>
+                <div class="pricing-price">€799<span>/mes</span></div>
+            </div>
+            <div class="pricing-features">
+                <ul>
+                    <li>✓ 2,000 leads/mes</li>
+                    <li>✓ 5 landings conectadas</li>
+                    <li>✓ WhatsApp IA Avanzada</li>
+                    <li>✓ Dashboard completo</li>
+                    <li>✓ Scoring avanzado</li>
+                    <li>✓ Email + Nurturing</li>
+                    <li>✓ 3 integraciones CRM</li>
+                    <li>✓ 3-10 comerciales</li>
+                    <li>✓ Soporte priority</li>
+                    <li>✓ Onboarding incluido</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="pricing-card">
+            <div class="pricing-header">
+                <h4>ENTERPRISE</h4>
+                <div class="pricing-price">Custom</div>
+            </div>
+            <div class="pricing-features">
+                <ul>
+                    <li>✓ Leads ilimitados</li>
+                    <li>✓ Landings ilimitadas</li>
+                    <li>✓ WhatsApp + Voice AI</li>
+                    <li>✓ Dashboard custom</li>
+                    <li>✓ Custom ML scoring</li>
+                    <li>✓ Nurturing avanzado</li>
+                    <li>✓ Integraciones custom</li>
+                    <li>✓ Comerciales ilimitados</li>
+                    <li>✓ Soporte dedicado</li>
+                    <li>✓ SLA 99.9%</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <p style="text-align: center; margin-top: 30px; color: #64748B; font-size: 9pt;">
+        <strong>Overage:</strong> €0.50/leads adicional (Starter) • €0.35/leads adicional (Professional)<br>
+        <strong>Prueba gratis 14 días</strong> — Sin tarjeta de crédito • Onboarding incluido en Professional y Enterprise
+    </p>
+</section>
+
+<!-- PAGE 8: CTA -->
+<section class="cta-section">
+    <h2>Empieza a captar más y mejor</h2>
+    <p>3 pasos para ver resultados desde el día 1</p>
+    
+    <div class="cta-steps">
+        <div class="cta-step">
+            <div class="cta-step-number">1</div>
+            <p>Agenda demo<br>de 30 min</p>
+        </div>
+        <div class="cta-step">
+            <div class="cta-step-number">2</div>
+            <p>Configuración<br>en 1 día</p>
+        </div>
+        <div class="cta-step">
+            <div class="cta-step-number">3</div>
+            <p>Primeros leads<br>en 48h</p>
+        </div>
+    </div>
+    
+    <div class="cta-contact">
+        <div class="cta-contact-item">
+            <span>📧</span> hola@zentria.es
+        </div>
+        <div class="cta-contact-item">
+            <span>🌐</span> www.zentria.es
+        </div>
+    </div>
+    
+    <div class="cta-badge">Prueba gratis 14 días — Sin tarjeta de crédito</div>
+</section>
+
+<!-- FOOTER -->
+<div class="footer">
+    <div class="footer-logo">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="140" height="42">
+            <defs>
+                <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:#818CF8;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#A78BFA;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <text x="20" y="40" font-family="system-ui, sans-serif" font-size="28" font-weight="700" fill="#F8FAFC">
+                <tspan fill="url(#grad2)">Z</tspan>entria
+            </text>
+        </svg>
+    </div>
+    <p>Captación inteligente para el sector educación</p>
+    <p style="margin-top: 10px;">Zentria Technologies S.L.</p>
+    <p class="footer-company">Documento confidencial — Versión MVP Abril 2026</p>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zentria — Scrum Board</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: #0F172A;
+            color: #E2E8F0;
+            min-height: 100vh;
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1E293B, #334155);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #334155;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .logo {
+            font-size: 20pt;
+            font-weight: 800;
+        }
+        
+        .logo span {
+            background: linear-gradient(90deg, #818CF8, #A78BFA);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .board-title {
+            font-size: 14pt;
+            color: #94A3B8;
+            padding-left: 20px;
+            border-left: 2px solid #334155;
+        }
+        
+        .header-right {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .sprint-info {
+            background: #334155;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 11pt;
+        }
+        
+        .sprint-info strong {
+            color: #A78BFA;
+        }
+        
+        .team-avatars {
+            display: flex;
+            gap: -8px;
+        }
+        
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366F1, #8B5CF6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11pt;
+            font-weight: 600;
+            border: 2px solid #1E293B;
+            margin-left: -8px;
+        }
+        
+        .avatar:first-child {
+            margin-left: 0;
+        }
+        
+        /* Sprint Stats */
+        .sprint-stats {
+            display: flex;
+            gap: 40px;
+            padding: 20px 40px;
+            background: #1E293B;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24pt;
+            font-weight: 700;
+        }
+        
+        .stat-label {
+            font-size: 9pt;
+            color: #64748B;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .stat.stories .stat-value { color: #818CF8; }
+        .stat.tasks .stat-value { color: #34D399; }
+        .stat.points .stat-value { color: #FBBF24; }
+        .stat.days .stat-value { color: #F472B6; }
+        
+        /* Kanban Board */
+        .kanban-board {
+            display: flex;
+            gap: 20px;
+            padding: 20px 40px;
+            overflow-x: auto;
+            min-height: calc(100vh - 180px);
+        }
+        
+        .column {
+            flex: 0 0 380px;
+            background: #1E293B;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            max-height: calc(100vh - 200px);
+        }
+        
+        .column-header {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #334155;
+        }
+        
+        .column-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 13pt;
+        }
+        
+        .column-count {
+            background: #334155;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 10pt;
+            color: #94A3B8;
+        }
+        
+        .column-color {
+            width: 4px;
+            height: 20px;
+            border-radius: 2px;
+        }
+        
+        .backlog .column-color { background: #64748B; }
+        .todo .column-color { background: #6366F1; }
+        .doing .column-color { background: #F59E0B; }
+        .done .column-color { background: #10B981; }
+        
+        .column-content {
+            padding: 16px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        
+        /* Epic Cards */
+        .epic-card {
+            background: #334155;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            overflow: hidden;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .epic-card:hover {
+            border-color: #475569;
+            transform: translateY(-2px);
+        }
+        
+        .epic-header {
+            padding: 16px;
+            cursor: pointer;
+        }
+        
+        .epic-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 9pt;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .epic-badge.tracking { background: #7C3AED; }
+        .epic-badge.whatsapp { background: #059669; }
+        .epic-badge.orchestrator { background: #DC2626; }
+        .epic-badge.funnel { background: #D97706; }
+        .epic-badge.scoring { background: #2563EB; }
+        .epic-badge.assignment { background: #DB2777; }
+        .epic-badge.email { background: #0891B2; }
+        .epic-badge.dashboard { background: #4F46E5; }
+        .epic-badge.crm { background: #9333EA; }
+        .epic-badge.infra { background: #475569; }
+        
+        .epic-title {
+            font-size: 12pt;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .epic-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 10pt;
+            color: #94A3B8;
+        }
+        
+        .epic-meta span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        /* Task List (Collapsible) */
+        .epic-tasks {
+            background: #1E293B;
+            border-top: 1px solid #334155;
+            padding: 12px 16px;
+            display: none;
+        }
+        
+        .epic-card.expanded .epic-tasks {
+            display: block;
+        }
+        
+        .task-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #334155;
+            font-size: 10pt;
+        }
+        
+        .task-item:last-child {
+            border-bottom: none;
+        }
+        
+        .task-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        
+        .task-status.todo { background: #64748B; }
+        .task-status.doing { background: #F59E0B; }
+        .task-status.done { background: #10B981; }
+        
+        .task-name {
+            flex: 1;
+        }
+        
+        .task-points {
+            background: #334155;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 9pt;
+            color: #94A3B8;
+        }
+        
+        .task-type {
+            font-size: 8pt;
+            color: #64748B;
+            text-transform: uppercase;
+        }
+        
+        /* Story Card */
+        .story-card {
+            background: #334155;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 3px solid;
+        }
+        
+        .story-card.epic-1 { border-color: #7C3AED; }
+        .story-card.epic-2 { border-color: #059669; }
+        .story-card.epic-3 { border-color: #DC2626; }
+        .story-card.epic-4 { border-color: #D97706; }
+        .story-card.epic-5 { border-color: #2563EB; }
+        .story-card.epic-6 { border-color: #DB2777; }
+        .story-card.epic-7 { border-color: #0891B2; }
+        .story-card.epic-8 { border-color: #4F46E5; }
+        .story-card.epic-9 { border-color: #9333EA; }
+        .story-card.epic-10 { border-color: #475569; }
+        
+        .story-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+        
+        .story-id {
+            font-size: 9pt;
+            color: #64748B;
+            font-weight: 600;
+        }
+        
+        .story-title {
+            font-size: 11pt;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+        
+        .story-points {
+            background: #1E293B;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 10pt;
+            font-weight: 600;
+        }
+        
+        .story-tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        
+        .story-tag {
+            font-size: 8pt;
+            padding: 3px 8px;
+            border-radius: 4px;
+            background: #1E293B;
+            color: #94A3B8;
+        }
+        
+        .story-tag.tech { color: #818CF8; }
+        .story-tag.security { color: #F472B6; }
+        .story-tag.ai { color: #34D399; }
+        
+        /* Progress Bar */
+        .progress-bar {
+            height: 3px;
+            background: #1E293B;
+            border-radius: 2px;
+            margin-top: 12px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.3s;
+        }
+        
+        .backlog .progress-fill { background: #64748B; width: 0%; }
+        .todo .progress-fill { background: #6366F1; width: 0%; }
+        .doing .progress-fill { background: #F59E0B; width: 50%; }
+        .done .progress-fill { background: #10B981; width: 100%; }
+        
+        /* Legend */
+        .legend {
+            padding: 16px 40px;
+            background: #1E293B;
+            display: flex;
+            gap: 30px;
+            border-top: 1px solid #334155;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 10pt;
+            color: #94A3B8;
+        }
+        
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+        
+        /* Expand/Collapse Icon */
+        .expand-icon {
+            float: right;
+            color: #64748B;
+            font-size: 14pt;
+            transition: transform 0.2s;
+        }
+        
+        .epic-card.expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+    <div class="header-left">
+        <div class="logo"><span>Z</span>entria</div>
+        <div class="board-title">Scrum Board — MVP v1.0</div>
+    </div>
+    <div class="header-right">
+        <div class="sprint-info">
+            <strong>Sprint 1:</strong> Foundation — 2 semanas
+        </div>
+        <div class="team-avatars">
+            <div class="avatar">TL</div>
+            <div class="avatar">BE</div>
+            <div class="avatar">FE</div>
+            <div class="avatar">ML</div>
+        </div>
+    </div>
+</div>
+
+<!-- Sprint Stats -->
+<div class="sprint-stats">
+    <div class="stat stories">
+        <div class="stat-value">24</div>
+        <div class="stat-label">User Stories</div>
+    </div>
+    <div class="stat tasks">
+        <div class="stat-value">156</div>
+        <div class="stat-label">Tasks</div>
+    </div>
+    <div class="stat points">
+        <div class="stat-value">89</div>
+        <div class="stat-label">Story Points</div>
+    </div>
+    <div class="stat days">
+        <div class="stat-value">14</div>
+        <div class="stat-label">Días del Sprint</div>
+    </div>
+</div>
+
+<!-- Kanban Board -->
+<div class="kanban-board">
+
+    <!-- BACKLOG -->
+    <div class="column backlog">
+        <div class="column-header">
+            <div class="column-title">
+                <div class="column-color"></div>
+                📋 Backlog
+            </div>
+            <div class="column-count">10 épicas</div>
+        </div>
+        <div class="column-content">
+            <div class="progress-bar"><div class="progress-fill"></div></div>
+            
+            <!-- Epic 1: Tracking SDK -->
+            <div class="epic-card">
+                <div class="epic-header" onclick="toggleEpic(this)">
+                    <div class="expand-icon">▼</div>
+                    <span class="epic-badge tracking">EPIC 1</span>
+                    <div class="epic-title">Tracking SDK — Captura de eventos en landings</div>
+                    <div class="epic-meta">
+                        <span>📝 4 stories</span>
+                        <span>⚡ 21 pts</span>
+                        <span>⏱️ 5 días</span>
+                    </div>
+                </div>
+                <div class="epic-tasks">
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">Diseñar schema de eventos</div>
+                        <div class="task-points">3</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">Implementar PageView tracker</div>
+                        <div class="task-points">5</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">Implementar Click tracker</div>
+                        <div class="task-points">5</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">Implementar Form focus/abandonment</div>
+                        <div class="task-points">8</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">Identity resolution (anon → known)</div>
+                        <div class="task-points">13</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">Testing con 3 landings piloto</div>
+                        <div class="task-points">5</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Epic 2: WhatsApp Gateway -->
+            <div class="epic-card">
+                <div class="epic-header" onclick="toggleEpic(this)">
+                    <div class="expand-icon">▼</div>
+                    <span class="epic-badge whatsapp">EPIC 2</span>
+                    <div class="epic-title">WhatsApp Gateway — Bot conversacional con IA</div>
+                    <div class="epic-meta">
+                        <span>📝 3 stories</span>
+                        <span>⚡ 18 pts</span>
+                        <span>⏱️ 4 días</span>
+                    </div>
+                </div>
+                <div class="epic-tasks">
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">Setup Twilio/360dialog account</div>
+                        <div class="task-points">2</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">Webhook handler para inbound messages</div>
+                        <div class="task-points">5</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">FAQ Bot — respuestas frecuentes</div>
+                        <div class="task-points">8</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">Qualification flow — presupuesto, timing</div>
+                        <div class="task-points">13</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">Message queue + retry logic</div>
+                        <div class="task-points">5</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Epic 3: Orquestador -->
+            <div class="epic-card">
+                <div class="epic-header" onclick="toggleEpic(this)">
+                    <div class="expand-icon">▼</div>
+                    <span class="epic-badge orchestrator">EPIC 3</span>
+                    <div class="epic-title">Agente Orquestador — Core del sistema</div>
+                    <div class="epic-meta">
+                        <span>📝 3 stories</span>
+                        <span>⚡ 16 pts</span>
+                        <span>⏱️ 4 días</span>
+                    </div>
+                </div>
+                <div class="epic-tasks">
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">LangGraph setup + basic structure</div>
+                        <div class="task-points">5</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">Context Aggregator (session + history)</div>
+                        <div class="task-points">8</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">Routing Engine — rules-based v1</div>
+                        <div class="task-points">8</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">Multi-channel input (form, whatsapp, email)</div>
+                        <div class="task-points">5</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">Output schema — Structured Lead Object</div>
+                        <div class="task-points">3</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Epic 4: Funnel Agent -->
+            <div class="epic-card">
+                <div class="epic-header" onclick="toggleEpic(this)">
+                    <div class="expand-icon">▼</div>
+                    <span class="epic-badge funnel">EPIC 4</span>
+                    <div class="epic-title">Agente Funnel — Clasificación de etapa</div>
+                    <div class="epic-meta">
+                        <span>📝 2 stories</span>
+                        <span>⚡ 8 pts</span>
+                        <span>⏱️ 2 días</span>
+                    </div>
+                </div>
+                <div class="epic-tasks">
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">Definir 4 etapas: Awareness → Decision</div>
+                        <div class="task-points">3</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">Classifier based on page content</div>
+                        <div class="task-points">8</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">Confidence score calculation</div>
+                        <div class="task-points">5</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Epic 5: Scoring Agent -->
+            <div class="epic-card">
+                <div class="epic-header" onclick="toggleEpic(this)">
+                    <div class="expand-icon">▼</div>
+                    <span class="epic-badge scoring">EPIC 5</span>
+                    <div class="epic-title">Agente Scoring — Modelo predictivo v1</div>
+                    <div class="epic-meta">
+                        <span>📝 2 stories</span>
+                        <span>⚡ 10 pts</span>
+                        <span>⏱️ 3 días</span>
+                    </div>
+                </div>
+                <div class="epic-tasks">
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">Scoring model: Demographic (30%)</div>
+                        <div class="task-points">5</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">Scoring model: Behavioral (40%)</div>
+                        <div class="task-points">8</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">Scoring model: Engagement (30%)</div>
+                        <div class="task-points">5</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">Hot/Warm/Cold threshold tuning</div>
+                        <div class="task-points">3</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Epic 6: Assignment Agent -->
+            <div class="epic-card">
+                <div class="epic-header" onclick="toggleEpic(this)">
+                    <div class="expand-icon">▼</div>
+                    <span class="epic-badge assignment">EPIC 6</span>
+                    <div class="epic-title">Agente Assignment — Routing inteligente</div>
+                    <div class="epic-meta">
+                        <span>📝 3 stories</span>
+                        <span>⚡ 12 pts</span>
+                        <span>⏱️ 3 días</span>
+                    </div>
+                </div>
+                <div class="epic-tasks">
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">Round-robin algorithm</div>
+                        <div class="task-points">3</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">Skill-based routing (tipo empresa)</div>
+                        <div class="task-points">5</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">Territory logic (geografía)</div>
+                        <div class="task-points">5</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">Capacity-based balancing</div>
+                        <div class="task-points">8</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Epic 7: Email Nurturing -->
+            <div class="epic-card">
+                <div class="epic-header" onclick="toggleEpic(this)">
+                    <div class="expand-icon">▼</div>
+                    <span class="epic-badge email">EPIC 7</span>
+                    <div class="epic-title">Email Nurturing — Sequences automatizados</div>
+                    <div class="epic-meta">
+                        <span>📝 2 stories</span>
+                        <span>⚡ 10 pts</span>
+                        <span>⏱️ 2 días</span>
+                    </div>
+                </div>
+                <div class="epic-tasks">
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">Brevo/SendGrid integration</div>
+                        <div class="task-points">5</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">Email tracking pixels + click tracking</div>
+                        <div class="task-points">8</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">Behavioral triggers</div>
+                        <div class="task-points">5</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">Nurture sequences (cold leads)</div>
+                        <div class="task-points">8</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Epic 8: Dashboard KPIs -->
+            <div class="epic-card">
+                <div class="epic-header" onclick="toggleEpic(this)">
+                    <div class="expand-icon">▼</div>
+                    <span class="epic-badge dashboard">EPIC 8</span>
+                    <div class="epic-title">Dashboard KPIs — Visualización de métricas</div>
+                    <div class="epic-meta">
+                        <span>📝 2 stories</span>
+                        <span>⚡ 12 pts</span>
+                        <span>⏱️ 3 días</span>
+                    </div>
+                </div>
+                <div class="epic-tasks">
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">KPIs Captación (leads, funnel, fuentes)</div>
+                        <div class="task-points">8</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">KPIs Comercial (response time, pipeline)</div>
+                        <div class="task-points">5</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">KPIs IA (accuracy, resolution rate)</div>
+                        <div class="task-points">5</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">Filtros por fecha, landing, fuente</div>
+                        <div class="task-points">3</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Epic 9: CRM Integration -->
+            <div class="epic-card">
+                <div class="epic-header" onclick="toggleEpic(this)">
+                    <div class="expand-icon">▼</div>
+                    <span class="epic-badge crm">EPIC 9</span>
+                    <div class="epic-title">CRM Integration — PipeDrive/HubSpot</div>
+                    <div class="epic-meta">
+                        <span>📝 2 stories</span>
+                        <span>⚡ 10 pts</span>
+                        <span>⏱️ 2 días</span>
+                    </div>
+                </div>
+                <div class="epic-tasks">
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">PipeDrive API client</div>
+                        <div class="task-points">5</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">Create/update Lead → Opportunity</div>
+                        <div class="task-points">8</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">Webhook para status changes</div>
+                        <div class="task-points">5</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">Field mapping config</div>
+                        <div class="task-points">3</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Epic 10: Infrastructure -->
+            <div class="epic-card">
+                <div class="epic-header" onclick="toggleEpic(this)">
+                    <div class="expand-icon">▼</div>
+                    <span class="epic-badge infra">EPIC 10</span>
+                    <div class="epic-title">Infrastructure — Base técnica</div>
+                    <div class="epic-meta">
+                        <span>📝 3 stories</span>
+                        <span>⚡ 16 pts</span>
+                        <span>⏱️ 4 días</span>
+                    </div>
+                </div>
+                <div class="epic-tasks">
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">AWS setup (VPC, ECS, RDS, Redis)</div>
+                        <div class="task-points">8</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">CI/CD pipeline (GitHub Actions)</div>
+                        <div class="task-points">5</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">API Gateway + Auth (JWT, API Keys)</div>
+                        <div class="task-points">5</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">Monitoring + Logging (CloudWatch)</div>
+                        <div class="task-points">3</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-status todo"></div>
+                        <div class="task-name">Environment configs (dev, staging, prod)</div>
+                        <div class="task-points">2</div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- TODO -->
+    <div class="column todo">
+        <div class="column-header">
+            <div class="column-title">
+                <div class="column-color"></div>
+                📝 To Do
+            </div>
+            <div class="column-count">8 stories</div>
+        </div>
+        <div class="column-content">
+            <div class="progress-bar"><div class="progress-fill"></div></div>
+            
+            <!-- Story Cards -->
+            <div class="story-card epic-1">
+                <div class="story-header">
+                    <div>
+                        <div class="story-id">US-001</div>
+                        <div class="story-title">Como developer, quiero un SDK de tracking que se pueda instalar en cualquier landing</div>
+                    </div>
+                    <div class="story-points">5</div>
+                </div>
+                <div class="story-tags">
+                    <span class="story-tag tech">TypeScript</span>
+                    <span class="story-tag">CDN/ NPM</span>
+                </div>
+            </div>
+            
+            <div class="story-card epic-1">
+                <div class="story-header">
+                    <div>
+                        <div class="story-id">US-002</div>
+                        <div class="story-title">Como empresa de formación, quiero saber qué páginas visita cada lead</div>
+                    </div>
+                    <div class="story-points">3</div>
+                </div>
+                <div class="story-tags">
+                    <span class="story-tag tech">API</span>
+                    <span class="story-tag">Events</span>
+                </div>
+            </div>
+            
+            <div class="story-card epic-3">
+                <div class="story-header">
+                    <div>
+                        <div class="story-id">US-003</div>
+                        <div class="story-title">Como sistema, quiero recibir leads de múltiples fuentes y unificarlos</div>
+                    </div>
+                    <div class="story-points">5</div>
+                </div>
+                <div class="story-tags">
+                    <span class="story-tag tech">LangGraph</span>
+                    <span class="story-tag ai">AI</span>
+                </div>
+            </div>
+            
+            <div class="story-card epic-5">
+                <div class="story-header">
+                    <div>
+                        <div class="story-id">US-004</div>
+                        <div class="story-title">Como comercial, quiero ver un score de 0-100 para cada lead</div>
+                    </div>
+                    <div class="story-points">3</div>
+                </div>
+                <div class="story-tags">
+                    <span class="story-tag ai">ML</span>
+                    <span class="story-tag">Scoring</span>
+                </div>
+            </div>
+            
+            <div class="story-card epic-6">
+                <div class="story-header">
+                    <div>
+                        <div class="story-id">US-005</div>
+                        <div class="story-title">Como comercial, quiero recibir leads automáticamente según mi disponibilidad</div>
+                    </div>
+                    <div class="story-points">5</div>
+                </div>
+                <div class="story-tags">
+                    <span class="story-tag tech">Routing</span>
+                    <span class="story-tag">Business Logic</span>
+                </div>
+            </div>
+            
+            <div class="story-card epic-2">
+                <div class="story-header">
+                    <div>
+                        <div class="story-id">US-006</div>
+                        <div class="story-title">Como lead, quiero recibir respuesta inmediata por WhatsApp las 24h</div>
+                    </div>
+                    <div class="story-points">8</div>
+                </div>
+                <div class="story-tags">
+                    <span class="story-tag tech">WhatsApp</span>
+                    <span class="story-tag ai">AI</span>
+                </div>
+            </div>
+            
+            <div class="story-card epic-8">
+                <div class="story-header">
+                    <div>
+                        <div class="story-id">US-007</div>
+                        <div class="story-title">Como director, quiero ver cuántos leads hot tengo hoy</div>
+                    </div>
+                    <div class="story-points">3</div>
+                </div>
+                <div class="story-tags">
+                    <span class="story-tag tech">Dashboard</span>
+                    <span class="story-tag">React</span>
+                </div>
+            </div>
+            
+            <div class="story-card epic-9">
+                <div class="story-header">
+                    <div>
+                        <div class="story-id">US-008</div>
+                        <div class="story-title">Como comercial, quiero ver el lead en PipeDrive con todo el contexto</div>
+                    </div>
+                    <div class="story-points">5</div>
+                </div>
+                <div class="story-tags">
+                    <span class="story-tag tech">API</span>
+                    <span class="story-tag">CRM</span>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- DOING -->
+    <div class="column doing">
+        <div class="column-header">
+            <div class="column-title">
+                <div class="column-color"></div>
+                🔄 In Progress
+            </div>
+            <div class="column-count">4 stories</div>
+        </div>
+        <div class="column-content">
+            <div class="progress-bar"><div class="progress-fill"></div></div>
+            
+            <div class="story-card epic-10">
+                <div class="story-header">
+                    <div>
+                        <div class="story-id">US-009</div>
+                        <div class="story-title">Como devops, quiero la infraestructura base desplegada en AWS</div>
+                    </div>
+                    <div class="story-points">8</div>
+                </div>
+                <div class="story-tags">
+                    <span class="story-tag tech">AWS</span>
+                    <span class="story-tag">Terraform</span>
+                    <span class="story-tag security">Security</span>
+                </div>
+            </div>
+            
+            <div class="story-card epic-3">
+                <div class="story-header">
+                    <div>
+                        <div class="story-id">US-010</div>
+                        <div class="story-title">Como sistema, quiero un orquestador que dirija cada lead al agente correcto</div>
+                    </div>
+                    <div class="story-points">8</div>
+                </div>
+                <div class="story-tags">
+                    <span class="story-tag tech">LangGraph</span>
+                    <span class="story-tag ai">AI</span>
+                    <span class="story-tag ai">Core</span>
+                </div>
+            </div>
+            
+            <div class="story-card epic-4">
+                <div class="story-header">
+                    <div>
+                        <div class="story-id">US-011</div>
+                        <div class="story-title">Como sistema, quiero clasificar cada lead en Awareness/Interest/Consideration/Decision</div>
+                    </div>
+                    <div class="story-points">5</div>
+                </div>
+                <div class="story-tags">
+                    <span class="story-tag ai">AI</span>
+                    <span class="story-tag">Classification</span>
+                </div>
+            </div>
+            
+            <div class="story-card epic-5">
+                <div class="story-header">
+                    <div>
+                        <div class="story-id">US-012</div>
+                        <div class="story-title">Como director, quiero saber qué leads tienen 80%+ de probabilidad de convertir</div>
+                    </div>
+                    <div class="story-points">5</div>
+                </div>
+                <div class="story-tags">
+                    <span class="story-tag ai">ML</span>
+                    <span class="story-tag">Scoring</span>
+                    <span class="story-tag">Prediction</span>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- DONE -->
+    <div class="column done">
+        <div class="column-header">
+            <div class="column-title">
+                <div class="column-color"></div>
+                ✅ Done
+            </div>
+            <div class="column-count">2 stories</div>
+        </div>
+        <div class="column-content">
+            <div class="progress-bar"><div class="progress-fill"></div></div>
+            
+            <div class="story-card epic-10">
+                <div class="story-header">
+                    <div>
+                        <div class="story-id">US-000</div>
+                        <div class="story-title">Technical spike: Evaluación de stack tecnológico</div>
+                    </div>
+                    <div class="story-points">3</div>
+                </div>
+                <div class="story-tags">
+                    <span class="story-tag tech">Research</span>
+                </div>
+            </div>
+            
+            <div class="story-card epic-10">
+                <div class="story-header">
+                    <div>
+                        <div class="story-id">US-000</div>
+                        <div class="story-title">Setup inicial: Repositorio, ESLint, Prettier, TypeScript config</div>
+                    </div>
+                    <div class="story-points">2</div>
+                </div>
+                <div class="story-tags">
+                    <span class="story-tag tech">DevOps</span>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+</div>
+
+<!-- Legend -->
+<div class="legend">
+    <div class="legend-item">
+        <div class="legend-color" style="background: #7C3AED;"></div>
+        Tracking SDK
+    </div>
+    <div class="legend-item">
+        <div class="legend-color" style="background: #059669;"></div>
+        WhatsApp
+    </div>
+    <div class="legend-item">
+        <div class="legend-color" style="background: #DC2626;"></div>
+        Orchestrator
+    </div>
+    <div class="legend-item">
+        <div class="legend-color" style="background: #D97706;"></div>
+        Funnel
+    </div>
+    <div class="legend-item">
+        <div class="legend-color" style="background: #2563EB;"></div>
+        Scoring
+    </div>
+    <div class="legend-item">
+        <div class="legend-color" style="background: #DB2777;"></div>
+        Assignment
+    </div>
+    <div class="legend-item">
+        <div class="legend-color" style="background: #0891B2;"></div>
+        Email
+    </div>
+    <div class="legend-item">
+        <div class="legend-color" style="background: #4F46E5;"></div>
+        Dashboard
+    </div>
+    <div class="legend-item">
+        <div class="legend-color" style="background: #9333EA;"></div>
+        CRM
+    </div>
+    <div class="legend-item">
+        <div class="legend-color" style="background: #475569;"></div>
+        Infrastructure
+    </div>
+</div>
+
+<script>
+    function toggleEpic(element) {
+        const card = element.closest('.epic-card');
+        card.classList.toggle('expanded');
+    }
+    
+    // Expand first 3 epics by default
+    document.querySelectorAll('.epic-card').forEach((card, index) => {
+        if (index < 3) {
+            card.classList.add('expanded');
+        }
+    });
+</script>
+
+</body>
+</html>
