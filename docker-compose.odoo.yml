@@ -9,6 +9,7 @@ services:
     volumes:
       - odoo_data:/var/lib/odoo
       - ./odoo/addons:/mnt/extra-addons
+      - ./odoo/odoo.conf:/etc/odoo/odoo.conf:ro
     environment:
       HOST: odoo-postgres
       USER: ${ODOO_DB_USER:-odoo}
