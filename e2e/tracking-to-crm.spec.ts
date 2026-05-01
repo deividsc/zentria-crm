@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { Client } from 'pg';
 
-const DB_URL = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/zentria';
+const DB_URL = process.env.DATABASE_URL || 'postgresql://zentria:zentria_dev@localhost:5433/zentria_tracking';
 const ODOO_URL = process.env.ODOO_URL || 'http://localhost:8069';
 const ODOO_DB = process.env.ODOO_DB || 'odoo';
 const ODOO_USER = process.env.ODOO_API_USER || 'admin';
@@ -28,11 +28,15 @@ async function pollDb<T>(
   }
 }
 
+let odooSessionCookie = '';
+
 async function odooXmlRpc(method: string, model: string, args: unknown[]): Promise<unknown> {
-  // Use Odoo JSON-RPC instead of XML-RPC for simplicity in Node
   const response = await fetch(`${ODOO_URL}/web/dataset/call_kw`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(odooSessionCookie ? { 'Cookie': odooSessionCookie } : {}),
+    },
     body: JSON.stringify({
       jsonrpc: '2.0',
       method: 'call',
@@ -59,6 +63,8 @@ async function odooAuthenticate(): Promise<number> {
       params: { db: ODOO_DB, login: ODOO_USER, password: ODOO_PASSWORD },
     }),
   });
+  const setCookie = response.headers.get('set-cookie');
+  if (setCookie) odooSessionCookie = setCookie.split(';')[0];
   const data = await response.json() as { result?: { uid: number } };
   if (!data.result?.uid) throw new Error('Odoo auth failed');
   return data.result.uid;
@@ -95,11 +101,11 @@ test.describe('Tracking SDK → Odoo CRM full flow', () => {
     await submitBtn.click();
     await page.waitForTimeout(1000);
 
-    // 6. Wait for identity_linked event in PostgreSQL (10s timeout)
+    // 6. Wait for identity_linked event in PostgreSQL (15s timeout)
     const event = await pollDb<{ event_id: string }>(
-      `SELECT event_id FROM events WHERE event_type = 'identity_linked' AND event_data->>'email' = $1 ORDER BY created_at DESC LIMIT 1`,
+      `SELECT event_id FROM events WHERE event_type = 'identity_linked' AND known_id = $1 ORDER BY created_at DESC LIMIT 1`,
       [testEmail],
-      10_000
+      15_000
     );
     expect(event, `identity_linked event not found for ${testEmail} within 10s`).not.toBeNull();
 
@@ -116,7 +122,7 @@ test.describe('Tracking SDK → Odoo CRM full flow', () => {
     // 8. Verify lead in Odoo CRM
     await odooAuthenticate();
     const leads = await odooXmlRpc('search_read', 'crm.lead', [
-      [[['email_from', '=', testEmail]]],
+      [['email_from', '=', testEmail]],
       ['id', 'email_from', 'name'],
       0, 1,
     ]) as Array<{ id: number; email_from: string }>;

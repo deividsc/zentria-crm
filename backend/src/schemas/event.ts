@@ -20,7 +20,7 @@ export const CtaClickEventDataSchema = z.object({
 });
 
 export const IdentityLinkedEventDataSchema = z.object({
-  known_id: z.string().uuid(),
+  known_id: z.string().max(255),
   linked_at: z.string().datetime(),
 });
 

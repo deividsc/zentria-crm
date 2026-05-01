@@ -44,3 +44,13 @@ __pycache__/
 # Supabase
 .supabase/
 odoo/odoo.conf
+
+# Playwright / E2E
+playwright-report/
+test-results/
+
+# Generated SDK builds
+landing/js/sdk.iife.js
+
+# Package locks (monorepo uses root)
+package-lock.json

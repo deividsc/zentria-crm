@@ -1,0 +1,3 @@
+ALTER TABLE events ALTER COLUMN known_id TYPE VARCHAR(255);
+ALTER TABLE sessions ALTER COLUMN known_id TYPE VARCHAR(255);
+ALTER TABLE anonymous_profiles ALTER COLUMN merged_to_known_id TYPE VARCHAR(255);

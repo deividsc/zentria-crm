@@ -7,7 +7,7 @@
           "interval": [
             {
               "field": "seconds",
-              "secondsInterval": 60
+              "secondsInterval": 5
             }
           ]
         }
@@ -21,7 +21,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT\n  e.event_id,\n  e.session_id,\n  e.known_id,\n  e.created_at,\n  fs.event_data->>'email' AS email,\n  fs.event_data->>'phone' AS phone,\n  fs.event_data->>'name' AS contact_name\nFROM events e\nLEFT JOIN events fs ON (\n  fs.session_id = e.session_id\n  AND fs.event_type = 'form_submit'\n  AND fs.created_at <= e.created_at\n)\nLEFT JOIN odoo_sync_log osl ON osl.event_id = e.event_id\nWHERE e.event_type = 'identity_linked'\n  AND osl.event_id IS NULL\nORDER BY e.created_at ASC\nLIMIT 50",
+        "query": "SELECT\n  e.event_id,\n  e.session_id,\n  e.known_id,\n  e.created_at,\n  COALESCE(fs.event_data->>'email', e.known_id) AS email,\n  fs.event_data->>'phone' AS phone,\n  fs.event_data->>'name' AS contact_name\nFROM events e\nLEFT JOIN events fs ON (\n  fs.session_id = e.session_id\n  AND fs.event_type = 'form_submit'\n  AND fs.created_at <= e.created_at\n)\nLEFT JOIN odoo_sync_log osl ON osl.event_id = e.event_id\nWHERE e.event_type = 'identity_linked'\n  AND osl.event_id IS NULL\nORDER BY e.created_at ASC\nLIMIT 50",
         "options": {}
       },
       "id": "node-fetch-events",
@@ -78,7 +78,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "INSERT INTO odoo_sync_log (id, event_id, email, status, created_at, updated_at)\nVALUES (\n  gen_random_uuid(),\n  '{{ $json.event_id }}',\n  '{{ $json.email }}',\n  'pending',\n  NOW(),\n  NOW()\n)\nON CONFLICT (event_id) DO NOTHING;\n\nSELECT\n  CASE WHEN status = 'pending' AND created_at > NOW() - INTERVAL '5 seconds'\n    THEN true ELSE false END AS was_inserted,\n  event_id\nFROM odoo_sync_log\nWHERE event_id = '{{ $json.event_id }}'",
+        "query": "INSERT INTO odoo_sync_log (id, event_id, email, status, created_at, updated_at)\nVALUES (\n  gen_random_uuid(),\n  '{{ $json.event_id }}',\n  '{{ $json.email }}',\n  'pending',\n  NOW(),\n  NOW()\n)\nON CONFLICT (event_id) DO NOTHING;\n\nSELECT\n  CASE WHEN status = 'pending'\n    THEN true ELSE false END AS was_inserted,\n  event_id\nFROM odoo_sync_log\nWHERE event_id = '{{ $json.event_id }}'",
         "options": {}
       },
       "id": "node-claim-event",
@@ -380,7 +380,7 @@
       ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1",
     "saveManualExecutions": true,

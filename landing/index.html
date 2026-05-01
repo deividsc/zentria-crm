@@ -486,6 +486,25 @@ tracker.identify(<span class="text-[#10B981]">'user_456'</span>, {
             <p class="text-slate-500 dark:text-slate-400">© 2026 Zentria SDK. Reliable tracking for high-performance teams.</p>
 </div>
 </footer>
+<script src="js/sdk.iife.js"></script>
+<script>
+  if (typeof ZentriaTracking !== 'undefined') {
+    ZentriaTracking.init({
+      apiKey: 'dev_key_change_in_production',
+      endpoint: 'http://localhost:3000',
+      debug: true
+    });
+
+    document.addEventListener('submit', function(e) {
+      const form = e.target;
+      if (!(form instanceof HTMLFormElement)) return;
+      const emailInput = form.querySelector('input[type="email"]');
+      if (!emailInput) return;
+      const email = emailInput.value.trim();
+      if (email) ZentriaTracking.identifyUser(email);
+    }, true);
+  }
+</script>
 <script>
   // Mobile menu toggle
   (function() {
