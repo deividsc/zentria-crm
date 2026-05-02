@@ -486,13 +486,15 @@ tracker.identify(<span class="text-[#10B981]">'user_456'</span>, {
             <p class="text-slate-500 dark:text-slate-400">© 2026 Zentria SDK. Reliable tracking for high-performance teams.</p>
 </div>
 </footer>
+<script src="js/zentria-config.js"></script>
 <script src="js/sdk.iife.js"></script>
 <script>
   if (typeof ZentriaTracking !== 'undefined') {
+    var _cfg = window.ZENTRIA_CONFIG || {};
     ZentriaTracking.init({
-      apiKey: 'dev_key_change_in_production',
-      endpoint: 'http://localhost:3000',
-      debug: true
+      apiKey: _cfg.apiKey || 'dev_key_change_in_production',
+      endpoint: _cfg.endpoint || 'http://localhost:3000',
+      debug: _cfg.debug !== undefined ? _cfg.debug : true,
     });
 
     document.addEventListener('submit', function(e) {

@@ -45,6 +45,7 @@ function buildEvent(
     anonymousId,
     knownId,
     sessionId,
+    leadId: '',
   };
 }
 
@@ -180,6 +181,18 @@ function handleFormStart(
   );
 }
 
+function extractFormField(form: HTMLFormElement, names: string[]): string | undefined {
+  for (const el of Array.from(form.elements)) {
+    const input = el as HTMLInputElement;
+    const key = (input.name || input.id || '').toLowerCase();
+    if (names.some(n => key === n || key.includes(n))) {
+      const val = input.value?.trim();
+      if (val) return val;
+    }
+  }
+  return undefined;
+}
+
 function handleFormSubmit(
   event: SubmitEvent,
   anonymousId: string,
@@ -190,12 +203,20 @@ function handleFormSubmit(
   const startTime = formStartTimes.get(form);
   const durationMs = startTime ? Date.now() - startTime : undefined;
 
+  const emailInput = form.querySelector<HTMLInputElement>('input[type="email"]');
+  const email = emailInput?.value?.trim() || extractFormField(form, ['email', 'mail', 'correo']);
+  const name = extractFormField(form, ['name', 'nombre', 'fullname', 'full_name', 'firstname', 'first_name', 'lastname', 'last_name']);
+  const phone = extractFormField(form, ['phone', 'tel', 'telephone', 'telefono', 'celular', 'mobile']);
+
   emit(
     'form_submit',
     {
       formId: form.id || undefined,
       formAction: form.action || undefined,
       durationMs,
+      email: email || undefined,
+      name: name || undefined,
+      phone: phone || undefined,
     },
     anonymousId,
     knownId,

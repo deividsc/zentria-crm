@@ -13,6 +13,7 @@ export interface QueuedEvent {
   anonymousId: string;
   knownId: string | null;
   sessionId: string;
+  leadId: string;
 }
 
 const BUFFER_KEY = '__zentria_buffer';

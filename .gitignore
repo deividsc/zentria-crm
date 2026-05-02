@@ -52,5 +52,8 @@ test-results/
 # Generated SDK builds
 landing/js/sdk.iife.js
 
+# Landing environment config (copy from zentria-config.example.js)
+landing/js/zentria-config.js
+
 # Package locks (monorepo uses root)
 package-lock.json

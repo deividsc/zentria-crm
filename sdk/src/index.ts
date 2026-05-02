@@ -129,6 +129,7 @@ export function track(eventType: string, eventData?: Record<string, unknown>): v
     anonymousId: identity.anonymousId,
     knownId: identity.knownId,
     sessionId: state.sessionId,
+    leadId: identity.leadId,
   };
 
   enqueue(event);
@@ -202,7 +203,7 @@ export function init(config: SDKConfig): void {
   // Initialize auto-capture
   const identity = getIdentity();
   state.captureCleanup = initCapture(
-    (event) => enqueue(event),
+    (event) => enqueue({ ...event, leadId: getIdentity().leadId }),
     identity.anonymousId,
     identity.knownId,
     state.sessionId,

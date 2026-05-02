@@ -7,8 +7,9 @@ const fastify = Fastify({
 });
 
 async function start(): Promise<void> {
+  const corsOrigin = process.env.CORS_ORIGIN;
   await fastify.register(cors, {
-    origin: true,
+    origin: corsOrigin ? corsOrigin.split(',') : true,
     credentials: true,
   });
 

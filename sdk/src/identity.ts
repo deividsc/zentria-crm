@@ -5,6 +5,7 @@
 
 const COOKIE_NAME = '__zentria_anon_id';
 const COOKIE_MAX_AGE_DAYS = 365;
+const LEAD_ID_KEY = '__zentria_lead_id';
 
 /**
  * Generate a UUID v4 string without external dependencies.
@@ -55,6 +56,7 @@ export interface IdentityState {
   anonymousId: string;
   knownId: string | null;
   traits: Record<string, unknown>;
+  leadId: string;
 }
 
 let state: IdentityState | null = null;
@@ -74,6 +76,7 @@ export function initIdentity(): IdentityState {
 
   let knownId: string | null = null;
   let traits: Record<string, unknown> = {};
+  let leadId: string;
 
   try {
     const stored = typeof localStorage !== 'undefined' ? localStorage.getItem('__zentria_known') : null;
@@ -86,7 +89,21 @@ export function initIdentity(): IdentityState {
     // localStorage may be disabled (private mode, etc.)
   }
 
-  state = { anonymousId, knownId, traits };
+  try {
+    const storedLeadId = typeof localStorage !== 'undefined' ? localStorage.getItem(LEAD_ID_KEY) : null;
+    if (storedLeadId) {
+      leadId = storedLeadId;
+    } else {
+      leadId = generateUUID();
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem(LEAD_ID_KEY, leadId);
+      }
+    }
+  } catch {
+    leadId = generateUUID();
+  }
+
+  state = { anonymousId, knownId, traits, leadId };
   return state;
 }
 
