@@ -16,7 +16,10 @@
       "name": "Schedule Trigger",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.1,
-      "position": [240, 300]
+      "position": [
+        240,
+        300
+      ]
     },
     {
       "parameters": {
@@ -28,10 +31,13 @@
       "name": "Fetch Unprocessed Events",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.3,
-      "position": [460, 300],
+      "position": [
+        460,
+        300
+      ],
       "credentials": {
         "postgres": {
-          "id": "POSTGRES_READER_CREDENTIAL_ID",
+          "id": "oTO31KuctSoTZg71",
           "name": "Postgres Reader"
         }
       }
@@ -63,7 +69,10 @@
       "name": "Has Items?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [680, 300]
+      "position": [
+        680,
+        300
+      ]
     },
     {
       "parameters": {
@@ -73,22 +82,28 @@
       "name": "Normalize Email",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [900, 200]
+      "position": [
+        900,
+        200
+      ]
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "INSERT INTO odoo_sync_log (id, event_id, email, status, created_at, updated_at)\nVALUES (\n  gen_random_uuid(),\n  '{{ $json.event_id }}',\n  '{{ $json.email }}',\n  'pending',\n  NOW(),\n  NOW()\n)\nON CONFLICT (event_id) DO NOTHING;\n\nSELECT\n  CASE WHEN status = 'pending'\n    THEN true ELSE false END AS was_inserted,\n  event_id\nFROM odoo_sync_log\nWHERE event_id = '{{ $json.event_id }}'",
+        "query": "INSERT INTO odoo_sync_log (id, event_id, email, status, created_at, updated_at)\nVALUES (\n  gen_random_uuid(),\n  '{{ $json.event_id }}',\n  '{{ $json.email }}',\n  'pending',\n  NOW(),\n  NOW()\n)\nON CONFLICT (event_id) DO NOTHING;\n\nSELECT\n  CASE WHEN status = 'pending' THEN true ELSE false END AS was_inserted,\n  event_id,\n  email\nFROM odoo_sync_log\nWHERE event_id = '{{ $json.event_id }}' ",
         "options": {}
       },
       "id": "node-claim-event",
       "name": "Claim Event",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.3,
-      "position": [1120, 200],
+      "position": [
+        1120,
+        200
+      ],
       "credentials": {
         "postgres": {
-          "id": "POSTGRES_WRITER_CREDENTIAL_ID",
+          "id": "A2nNxNlCxy4Ba2ju",
           "name": "Postgres Writer"
         }
       }
@@ -120,31 +135,10 @@
       "name": "Was Claimed?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [1340, 200]
-    },
-    {
-      "parameters": {
-        "resource": "lead",
-        "operation": "getAll",
-        "returnAll": false,
-        "limit": 1,
-        "filters": {
-          "email": "={{ $('Normalize Email').item.json.email }}"
-        },
-        "options": {}
-      },
-      "id": "node-odoo-search-lead",
-      "name": "Search Existing Lead",
-      "type": "n8n-nodes-base.odoo",
-      "typeVersion": 1,
-      "position": [1560, 100],
-      "credentials": {
-        "odooApi": {
-          "id": "ODOO_CREDENTIAL_ID",
-          "name": "Odoo"
-        }
-      },
-      "onError": "continueErrorOutput"
+      "position": [
+        1340,
+        200
+      ]
     },
     {
       "parameters": {
@@ -157,11 +151,11 @@
           "conditions": [
             {
               "id": "condition-lead-exists",
-              "leftValue": "={{ $json.id }}",
-              "rightValue": "",
+              "leftValue": "={{ ($json.result || []).length }}",
+              "rightValue": 0,
               "operator": {
-                "type": "string",
-                "operation": "notEmpty"
+                "type": "number",
+                "operation": "gt"
               }
             }
           ],
@@ -173,66 +167,49 @@
       "name": "Lead Exists?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [1780, 100]
+      "position": [
+        1780,
+        100
+      ]
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "UPDATE odoo_sync_log\nSET status = 'duplicate',\n    odoo_lead_id = {{ $json.id }},\n    updated_at = NOW()\nWHERE event_id = '{{ $('Normalize Email').item.json.event_id }}'",
+        "query": "UPDATE odoo_sync_log\nSET status = 'duplicate',\n    odoo_lead_id = {{ ($json.result || [{}])[0].id || 0 }},\n    updated_at = NOW()\nWHERE event_id = '{{ $(\"Build Bodies\").item.json.event_id }}' ",
         "options": {}
       },
       "id": "node-mark-duplicate",
       "name": "Mark Duplicate",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.3,
-      "position": [2000, 0],
+      "position": [
+        2000,
+        0
+      ],
       "credentials": {
         "postgres": {
-          "id": "POSTGRES_WRITER_CREDENTIAL_ID",
+          "id": "A2nNxNlCxy4Ba2ju",
           "name": "Postgres Writer"
         }
       }
     },
     {
       "parameters": {
-        "resource": "lead",
-        "operation": "create",
-        "name": "={{ $('Normalize Email').item.json.contact_name || $('Normalize Email').item.json.email }}",
-        "additionalFields": {
-          "email_from": "={{ $('Normalize Email').item.json.email }}",
-          "phone": "={{ $('Normalize Email').item.json.phone }}",
-          "partner_name": "={{ $('Normalize Email').item.json.contact_name }}",
-          "description": "Captured via Zentria Tracking SDK",
-          "type": "lead"
-        }
-      },
-      "id": "node-odoo-create-lead",
-      "name": "Create Lead",
-      "type": "n8n-nodes-base.odoo",
-      "typeVersion": 1,
-      "position": [2000, 200],
-      "credentials": {
-        "odooApi": {
-          "id": "ODOO_CREDENTIAL_ID",
-          "name": "Odoo"
-        }
-      },
-      "onError": "continueErrorOutput"
-    },
-    {
-      "parameters": {
         "operation": "executeQuery",
-        "query": "UPDATE odoo_sync_log\nSET status = 'created',\n    odoo_lead_id = {{ $json.id }},\n    updated_at = NOW()\nWHERE event_id = '{{ $('Normalize Email').item.json.event_id }}'",
+        "query": "UPDATE odoo_sync_log\nSET status = 'created',\n    odoo_lead_id = {{ $json.result }},\n    updated_at = NOW()\nWHERE event_id = '{{ $(\"Build Bodies\").item.json.event_id }}' ",
         "options": {}
       },
       "id": "node-mark-created",
       "name": "Mark Created",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.3,
-      "position": [2220, 200],
+      "position": [
+        2220,
+        200
+      ],
       "credentials": {
         "postgres": {
-          "id": "POSTGRES_WRITER_CREDENTIAL_ID",
+          "id": "A2nNxNlCxy4Ba2ju",
           "name": "Postgres Writer"
         }
       }
@@ -240,19 +217,120 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "UPDATE odoo_sync_log\nSET status = 'error',\n    error_message = '{{ $json.message }}',\n    attempts = attempts + 1,\n    updated_at = NOW()\nWHERE event_id = '{{ $('Normalize Email').item.json.event_id }}'",
+        "query": "UPDATE odoo_sync_log\nSET status = 'error',\n    error_message = '{{ $json.message || $json.error }}',\n    attempts = COALESCE(attempts, 0) + 1,\n    updated_at = NOW()\nWHERE event_id = '{{ $(\"Build Bodies\").item.json.event_id || $(\"Was Claimed?\").item.json.event_id }}' ",
         "options": {}
       },
       "id": "node-mark-error",
       "name": "Mark Error",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.3,
-      "position": [2220, 420],
+      "position": [
+        2220,
+        420
+      ],
       "credentials": {
         "postgres": {
-          "id": "POSTGRES_WRITER_CREDENTIAL_ID",
+          "id": "A2nNxNlCxy4Ba2ju",
           "name": "Postgres Writer"
         }
+      }
+    },
+    {
+      "id": "node-odoo-auth",
+      "name": "Odoo Auth",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1560,
+        100
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://odoo:8069/web/session/authenticate",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "{\"jsonrpc\": \"2.0\", \"method\": \"call\", \"params\": {\"db\": \"odoo\", \"login\": \"admin\", \"password\": \"admin\"}}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "node-search-lead-http",
+      "name": "Search Lead HTTP",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1780,
+        100
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://odoo:8069/web/dataset/call_kw",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Cookie",
+              "value": "={{ ($json.headers['set-cookie'] || [''])[0].split(';')[0] }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ $('Build Bodies').item.json.searchBody }}",
+        "options": {}
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "node-create-lead-http",
+      "name": "Create Lead HTTP",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2000,
+        200
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://odoo:8069/web/dataset/call_kw",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Cookie",
+              "value": "={{ ($('Odoo Auth').item.json.headers['set-cookie'] || [''])[0].split(';')[0] }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ $('Build Bodies').item.json.createBody }}",
+        "options": {}
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "node-build-bodies",
+      "name": "Build Bodies",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1340,
+        100
+      ],
+      "parameters": {
+        "jsCode": "const { email, event_id } = $input.item.json;\nconst searchBody = JSON.stringify({\n  jsonrpc: '2.0', method: 'call',\n  params: {\n    model: 'crm.lead', method: 'search_read',\n    args: [[['email_from', '=', email]]],\n    kwargs: { fields: ['id', 'email_from', 'name'], limit: 1, context: {} }\n  }\n});\nconst createBody = JSON.stringify({\n  jsonrpc: '2.0', method: 'call',\n  params: {\n    model: 'crm.lead', method: 'create',\n    args: [[{ name: email, email_from: email, description: 'Captured via Zentria Tracking SDK', type: 'lead' }]],\n    kwargs: { context: {} }\n  }\n});\nreturn [{ json: { email, event_id, searchBody, createBody } }];"
       }
     }
   ],
@@ -317,7 +395,7 @@
       "main": [
         [
           {
-            "node": "Search Existing Lead",
+            "node": "Build Bodies",
             "type": "main",
             "index": 0
           }
@@ -325,7 +403,36 @@
         []
       ]
     },
-    "Search Existing Lead": {
+    "Build Bodies": {
+      "main": [
+        [
+          {
+            "node": "Odoo Auth",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Odoo Auth": {
+      "main": [
+        [
+          {
+            "node": "Search Lead HTTP",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Lead HTTP": {
       "main": [
         [
           {
@@ -354,14 +461,14 @@
         ],
         [
           {
-            "node": "Create Lead",
+            "node": "Create Lead HTTP",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Create Lead": {
+    "Create Lead HTTP": {
       "main": [
         [
           {
@@ -380,16 +487,15 @@
       ]
     }
   },
-  "active": true,
   "settings": {
     "executionOrder": "v1",
     "saveManualExecutions": true,
     "callerPolicy": "workflowsFromSameOwner",
     "errorWorkflow": ""
   },
-  "meta": {
-    "templateCredsSetupCompleted": false,
-    "instanceId": ""
-  },
-  "tags": []
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  }
 }
