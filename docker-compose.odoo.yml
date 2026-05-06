@@ -58,6 +58,7 @@ services:
       DB_POSTGRESDB_DATABASE: ${N8N_DB_NAME:-n8n}
       DB_POSTGRESDB_USER: ${N8N_DB_USER:-n8n}
       DB_POSTGRESDB_PASSWORD: ${N8N_DB_PASSWORD:-n8n_dev_password}
+      N8N_SECURE_COOKIE: "false"
     networks:
       - zentria-net
       - odoo-internal
