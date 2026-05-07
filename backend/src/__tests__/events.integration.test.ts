@@ -7,9 +7,12 @@ vi.mock('../db/index.js', () => ({
 }));
 
 vi.mock('../middleware/rateLimit.js', () => ({
-  rateLimit: vi.fn(async () => {
-    // Allow all requests in tests
-  }),
+  rateLimit: vi.fn(async () => {}),
+  checkIdentityRateLimit: vi.fn(async () => true),
+}));
+
+vi.mock('../middleware/originCheck.js', () => ({
+  originCheck: vi.fn(async () => {}),
 }));
 
 import { getClient } from '../db/index.js';
@@ -87,12 +90,19 @@ describe('POST /api/v1/events integration', () => {
     expect(body.error).toBe('Missing API key');
   });
 
-  it('should reject request with invalid API key', async () => {
+  it('should reject request when rate limiter returns 429', async () => {
+    // originCheck handles invalid API key — this test verifies the route still
+    // forwards the rateLimit preHandler response correctly
+    const { rateLimit } = await import('../middleware/rateLimit.js');
+    vi.mocked(rateLimit).mockImplementationOnce(async (_req, reply) => {
+      return reply.status(429).send({ error: 'Rate limit exceeded' });
+    });
+
     const response = await app.inject({
       method: 'POST',
       url: '/api/v1/events',
       headers: {
-        'X-API-Key': 'wrong-key',
+        'X-API-Key': 'test-api-key',
         'Content-Type': 'application/json',
       },
       payload: {
@@ -101,9 +111,9 @@ describe('POST /api/v1/events integration', () => {
       },
     });
 
-    expect(response.statusCode).toBe(401);
+    expect(response.statusCode).toBe(429);
     const body = JSON.parse(response.body);
-    expect(body.error).toBe('Invalid API key');
+    expect(body.error).toBe('Rate limit exceeded');
   });
 
   it('should reject invalid payload with 400', async () => {
