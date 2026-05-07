@@ -3,7 +3,7 @@
 # Uso: ./scripts/deploy-hetzner.sh
 set -euo pipefail
 
-HETZNER_IP="23.88.103.29"
+HETZNER_IP="23.88.106.29"
 REMOTE_USER="root"
 REMOTE_DIR="/opt/zentria-crm"
 SSH_TARGET="${REMOTE_USER}@${HETZNER_IP}"
