@@ -9,7 +9,6 @@ services:
     volumes:
       - odoo_data:/var/lib/odoo
       - ./odoo/addons:/mnt/extra-addons
-      - ./odoo/odoo.conf:/etc/odoo/odoo.conf:ro
     environment:
       HOST: odoo-postgres
       USER: ${ODOO_DB_USER:-odoo}
@@ -59,6 +58,10 @@ services:
       DB_POSTGRESDB_USER: ${N8N_DB_USER:-n8n}
       DB_POSTGRESDB_PASSWORD: ${N8N_DB_PASSWORD:-n8n_dev_password}
       N8N_SECURE_COOKIE: "false"
+      ODOO_URL: ${ODOO_URL:-http://odoo:8069}
+      ODOO_DB: ${ODOO_DB:-odoo}
+      ODOO_LOGIN: ${ODOO_LOGIN:-admin}
+      ODOO_PASSWORD: ${ODOO_PASSWORD}
     networks:
       - zentria-net
       - odoo-internal

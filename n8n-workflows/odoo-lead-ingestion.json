@@ -12,33 +12,27 @@
           ]
         }
       },
-      "id": "node-schedule-trigger",
+      "id": "8f741305-7276-4f5c-803e-6e5d62aa9606",
       "name": "Schedule Trigger",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.1,
-      "position": [
-        240,
-        300
-      ]
+      "position": [-720, 544]
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT\n  e.event_id,\n  e.session_id,\n  e.known_id,\n  e.created_at,\n  COALESCE(fs.event_data->>'email', e.known_id) AS email,\n  fs.event_data->>'phone' AS phone,\n  fs.event_data->>'name' AS contact_name\nFROM events e\nLEFT JOIN events fs ON (\n  fs.session_id = e.session_id\n  AND fs.event_type = 'form_submit'\n  AND fs.created_at <= e.created_at\n)\nLEFT JOIN odoo_sync_log osl ON osl.event_id = e.event_id\nWHERE e.event_type = 'identity_linked'\n  AND osl.event_id IS NULL\nORDER BY e.created_at ASC\nLIMIT 50",
+        "query": "SELECT\n  e.event_id,\n  e.session_id,\n  e.known_id AS email,\n  e.created_at,\n  e.risk_score,\n  e.risk_flags,\n  fs.event_data AS form_data\nFROM events e\nLEFT JOIN LATERAL (\n  SELECT event_data\n  FROM events fs2\n  WHERE fs2.session_id = e.session_id\n    AND fs2.event_type = 'form_submit'\n    AND fs2.created_at <= e.created_at\n    AND (fs2.event_data->>'email' = e.known_id OR fs2.event_data->>'email' IS NULL)\n  ORDER BY\n    CASE WHEN fs2.event_data->>'email' = e.known_id THEN 0 ELSE 1 END,\n    fs2.created_at DESC\n  LIMIT 1\n) fs ON true\nLEFT JOIN odoo_sync_log osl ON osl.event_id = e.event_id\nWHERE e.event_type = 'identity_linked'\n  AND (\n    osl.event_id IS NULL\n    OR (osl.status = 'pending' AND osl.updated_at < NOW() - INTERVAL '2 minutes')\n  )\nORDER BY e.created_at ASC\nLIMIT 50",
         "options": {}
       },
-      "id": "node-fetch-events",
+      "id": "8e70755d-579c-49d7-9942-c0476dfcdf0a",
       "name": "Fetch Unprocessed Events",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.3,
-      "position": [
-        460,
-        300
-      ],
+      "position": [-496, 544],
       "credentials": {
         "postgres": {
-          "id": "oTO31KuctSoTZg71",
-          "name": "Postgres Reader"
+          "id": "canVpLBoYXqrBa2Y",
+          "name": "Postgres Writer"
         }
       }
     },
@@ -48,7 +42,8 @@
           "options": {
             "caseSensitive": true,
             "leftValue": "",
-            "typeValidation": "strict"
+            "typeValidation": "strict",
+            "version": 1
           },
           "conditions": [
             {
@@ -65,45 +60,36 @@
         },
         "options": {}
       },
-      "id": "node-if-has-items",
+      "id": "9cf5947a-c7df-4e9d-b733-59bbbc44b7ec",
       "name": "Has Items?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [
-        680,
-        300
-      ]
+      "position": [-288, 544]
     },
     {
       "parameters": {
-        "jsCode": "const raw = $input.item.json;\n\n// Skip rows with no email\nif (!raw.email || typeof raw.email !== 'string') {\n  return [];\n}\n\nconst email = raw.email.trim().toLowerCase();\n\n// Skip empty email after trim\nif (email.length === 0) {\n  return [];\n}\n\nreturn [{\n  json: {\n    event_id: raw.event_id,\n    session_id: raw.session_id,\n    known_id: raw.known_id,\n    created_at: raw.created_at,\n    email: email,\n    phone: raw.phone || null,\n    contact_name: raw.contact_name || null\n  }\n}];"
+        "jsCode": "const raw = $input.item.json;\n\nif (!raw.email || typeof raw.email !== 'string') {\n  return [];\n}\n\nconst email = raw.email.trim().toLowerCase();\n\nif (email.length === 0) {\n  return [];\n}\n\nreturn [{\n  json: {\n    event_id: raw.event_id,\n    session_id: raw.session_id,\n    known_id: raw.known_id,\n    created_at: raw.created_at,\n    email: email,\n    form_data: raw.form_data || {},\n    risk_score: raw.risk_score || 0,\n    risk_flags: raw.risk_flags || []\n  }\n}];\n"
       },
-      "id": "node-normalize-email",
+      "id": "0587d824-361b-45c9-9c2e-63521f475ba3",
       "name": "Normalize Email",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [
-        900,
-        200
-      ]
+      "position": [-64, 448]
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "INSERT INTO odoo_sync_log (id, event_id, email, status, created_at, updated_at)\nVALUES (\n  gen_random_uuid(),\n  '{{ $json.event_id }}',\n  '{{ $json.email }}',\n  'pending',\n  NOW(),\n  NOW()\n)\nON CONFLICT (event_id) DO NOTHING;\n\nSELECT\n  CASE WHEN status = 'pending' THEN true ELSE false END AS was_inserted,\n  event_id,\n  email\nFROM odoo_sync_log\nWHERE event_id = '{{ $json.event_id }}' ",
+        "query": "INSERT INTO odoo_sync_log (id, event_id, email, status, created_at, updated_at)\nVALUES (\n  gen_random_uuid(),\n  '{{ $json.event_id }}',\n  '{{ $json.email }}',\n  'pending',\n  NOW(),\n  NOW()\n)\nON CONFLICT (event_id) DO NOTHING;\n\nSELECT\n  CASE WHEN osl.status = 'pending' THEN true ELSE false END AS was_inserted,\n  osl.event_id,\n  osl.email,\n  e.risk_score,\n  e.risk_flags,\n  fs.event_data AS form_data\nFROM odoo_sync_log osl\nJOIN events e ON e.event_id = osl.event_id\nLEFT JOIN LATERAL (\n  SELECT event_data\n  FROM events fs2\n  WHERE fs2.session_id = e.session_id\n    AND fs2.event_type = 'form_submit'\n    AND fs2.created_at <= e.created_at\n  ORDER BY fs2.created_at DESC\n  LIMIT 1\n) fs ON true\nWHERE osl.event_id = '{{ $json.event_id }}'\n",
         "options": {}
       },
-      "id": "node-claim-event",
+      "id": "54701bab-f794-4926-a65a-6d53dbdf38db",
       "name": "Claim Event",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.3,
-      "position": [
-        1120,
-        200
-      ],
+      "position": [160, 448],
       "credentials": {
         "postgres": {
-          "id": "A2nNxNlCxy4Ba2ju",
+          "id": "canVpLBoYXqrBa2Y",
           "name": "Postgres Writer"
         }
       }
@@ -114,7 +100,8 @@
           "options": {
             "caseSensitive": true,
             "leftValue": "",
-            "typeValidation": "strict"
+            "typeValidation": "strict",
+            "version": 1
           },
           "conditions": [
             {
@@ -123,7 +110,7 @@
               "rightValue": true,
               "operator": {
                 "type": "boolean",
-                "operation": "true"
+                "operation": "equal"
               }
             }
           ],
@@ -131,14 +118,22 @@
         },
         "options": {}
       },
-      "id": "node-if-was-claimed",
+      "id": "8f3f6a22-e6e9-4ec1-945b-14fbc207b3d3",
       "name": "Was Claimed?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [
-        1340,
-        200
-      ]
+      "position": [384, 560],
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.item.json;\nconst { email, event_id } = raw;\nconst formData = raw.form_data || {};\nconst riskScore = raw.risk_score || 0;\nconst riskFlags = raw.risk_flags || [];\n\nconst name = formData.name || null;\nconst phone = formData.phone || null;\n\nconst SKIP = new Set(['email', 'formId', 'formAction', 'durationMs', 'behavioral_signals']);\nconst lines = Object.entries(formData)\n  .filter(([k, v]) => !SKIP.has(k) && v !== null && v !== undefined && v !== '')\n  .map(([k, v]) => `${k}: ${v}`);\n\nlet description = 'Lead capturado via Zentria Tracking SDK';\nif (lines.length > 0) description += ' | ' + lines.join(' | ');\nif (riskScore >= 2) {\n  description += ' | REQUIRES REVIEW risk_score: ' + riskScore + ' flags: ' + riskFlags.join(', ');\n}\n\nconst leadValues = {\n  name: name || email,\n  email_from: email,\n  phone: phone || '',\n  contact_name: name || '',\n  description: description,\n  type: 'lead',\n};\n\nconst now = new Date().toLocaleString('es-ES', { timeZone: 'Europe/Madrid' });\nconst revisitNote = `<p><strong>Nuevo interés detectado</strong> — ${now}</p><p>El contacto volvió a mostrar interés a través del formulario de la landing.</p>${lines.length > 0 ? '<p>' + lines.join('<br/>') + '</p>' : ''}`;\n\nconst searchBody = JSON.stringify({\n  jsonrpc: '2.0', method: 'call',\n  params: {\n    model: 'crm.lead', method: 'search_read',\n    args: [[['email_from', '=', email]]],\n    kwargs: { fields: ['id', 'email_from', 'name', 'priority'], limit: 1, context: {} }\n  }\n});\n\nconst createBody = JSON.stringify({\n  jsonrpc: '2.0', method: 'call',\n  params: {\n    model: 'crm.lead', method: 'create',\n    args: [[leadValues]],\n    kwargs: { context: {} }\n  }\n});\n\nreturn [{ json: { email, event_id, name, phone, riskScore, riskFlags, revisitNote, searchBody, createBody } }];\n"
+      },
+      "id": "dd90ad01-fbe9-4684-b58a-b0ed619968b8",
+      "name": "Build Bodies",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [384, 352]
     },
     {
       "parameters": {
@@ -146,7 +141,8 @@
           "options": {
             "caseSensitive": true,
             "leftValue": "",
-            "typeValidation": "strict"
+            "typeValidation": "strict",
+            "version": 1
           },
           "conditions": [
             {
@@ -163,146 +159,16 @@
         },
         "options": {}
       },
-      "id": "node-if-lead-exists",
+      "id": "7ed65be7-ea40-48fb-9724-74b70485f886",
       "name": "Lead Exists?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [
-        1780,
-        100
-      ]
+      "position": [832, 352]
     },
     {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "UPDATE odoo_sync_log\nSET status = 'duplicate',\n    odoo_lead_id = {{ ($json.result || [{}])[0].id || 0 }},\n    updated_at = NOW()\nWHERE event_id = '{{ $(\"Build Bodies\").item.json.event_id }}' ",
-        "options": {}
-      },
-      "id": "node-mark-duplicate",
-      "name": "Mark Duplicate",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.3,
-      "position": [
-        2000,
-        0
-      ],
-      "credentials": {
-        "postgres": {
-          "id": "A2nNxNlCxy4Ba2ju",
-          "name": "Postgres Writer"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "UPDATE odoo_sync_log\nSET status = 'created',\n    odoo_lead_id = {{ $json.result }},\n    updated_at = NOW()\nWHERE event_id = '{{ $(\"Build Bodies\").item.json.event_id }}' ",
-        "options": {}
-      },
-      "id": "node-mark-created",
-      "name": "Mark Created",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.3,
-      "position": [
-        2220,
-        200
-      ],
-      "credentials": {
-        "postgres": {
-          "id": "A2nNxNlCxy4Ba2ju",
-          "name": "Postgres Writer"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "UPDATE odoo_sync_log\nSET status = 'error',\n    error_message = '{{ $json.message || $json.error }}',\n    attempts = COALESCE(attempts, 0) + 1,\n    updated_at = NOW()\nWHERE event_id = '{{ $(\"Build Bodies\").item.json.event_id || $(\"Was Claimed?\").item.json.event_id }}' ",
-        "options": {}
-      },
-      "id": "node-mark-error",
-      "name": "Mark Error",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.3,
-      "position": [
-        2220,
-        420
-      ],
-      "credentials": {
-        "postgres": {
-          "id": "A2nNxNlCxy4Ba2ju",
-          "name": "Postgres Writer"
-        }
-      }
-    },
-    {
-      "id": "node-odoo-auth",
-      "name": "Odoo Auth",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        1560,
-        100
-      ],
       "parameters": {
         "method": "POST",
-        "url": "http://odoo:8069/web/session/authenticate",
-        "sendBody": true,
-        "contentType": "json",
-        "specifyBody": "json",
-        "jsonBody": "{\"jsonrpc\": \"2.0\", \"method\": \"call\", \"params\": {\"db\": \"odoo\", \"login\": \"admin\", \"password\": \"admin\"}}",
-        "options": {
-          "response": {
-            "response": {
-              "fullResponse": true,
-              "responseFormat": "json"
-            }
-          }
-        }
-      },
-      "onError": "continueErrorOutput"
-    },
-    {
-      "id": "node-search-lead-http",
-      "name": "Search Lead HTTP",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        1780,
-        100
-      ],
-      "parameters": {
-        "method": "POST",
-        "url": "http://odoo:8069/web/dataset/call_kw",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Cookie",
-              "value": "={{ ($json.headers['set-cookie'] || [''])[0].split(';')[0] }}"
-            }
-          ]
-        },
-        "sendBody": true,
-        "contentType": "json",
-        "specifyBody": "json",
-        "jsonBody": "={{ $('Build Bodies').item.json.searchBody }}",
-        "options": {}
-      },
-      "onError": "continueErrorOutput"
-    },
-    {
-      "id": "node-create-lead-http",
-      "name": "Create Lead HTTP",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        2000,
-        200
-      ],
-      "parameters": {
-        "method": "POST",
-        "url": "http://odoo:8069/web/dataset/call_kw",
+        "url": "={{ $env.ODOO_URL }}/web/dataset/call_kw",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -313,189 +179,212 @@
           ]
         },
         "sendBody": true,
-        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ jsonrpc: '2.0', method: 'call', params: { model: 'mail.message', method: 'create', args: [{ res_id: ($('Search Lead HTTP').item.json.result || [{}])[0].id, model: 'crm.lead', message_type: 'comment', subtype_xmlid: 'mail.mt_note', body: $('Build Bodies').item.json.revisitNote }], kwargs: { context: {} } } }) }}",
+        "options": {}
+      },
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "name": "Add Revisit Note",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1040, 240],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE odoo_sync_log\nSET status = 'duplicate',\n    odoo_lead_id = {{ ($('Search Lead HTTP').item.json.result || [{}])[0].id || 0 }},\n    updated_at = NOW()\nWHERE event_id = '{{ $(\"Build Bodies\").item.json.event_id }}';\n\nUPDATE odoo_sync_log\nSET revisit_count = revisit_count + 1,\n    last_submission_at = NOW(),\n    updated_at = NOW()\nWHERE id = (\n  SELECT id FROM odoo_sync_log\n  WHERE email = '{{ $(\"Build Bodies\").item.json.email }}'\n    AND status = 'created'\n  ORDER BY created_at ASC\n  LIMIT 1\n);",
+        "options": {}
+      },
+      "id": "459eaddd-98a5-4ffd-808f-42ace94d6100",
+      "name": "Mark Duplicate",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.3,
+      "position": [1264, 240],
+      "credentials": {
+        "postgres": {
+          "id": "canVpLBoYXqrBa2Y",
+          "name": "Postgres Writer"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE odoo_sync_log\nSET status = 'created',\n    odoo_lead_id = {{ $json.result }},\n    last_submission_at = NOW(),\n    risk_score = {{ $(\"Build Bodies\").item.json.riskScore || 0 }},\n    risk_flags = ARRAY[{{ $(\"Build Bodies\").item.json.riskFlags ? $(\"Build Bodies\").item.json.riskFlags.map(f => `'${f}'`).join(',') : '' }}]::TEXT[],\n    updated_at = NOW()\nWHERE event_id = '{{ $(\"Build Bodies\").item.json.event_id }}'",
+        "options": {}
+      },
+      "id": "e845ebbf-6bf3-407f-a9ad-3f5da96503f2",
+      "name": "Mark Created",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.3,
+      "position": [1264, 448],
+      "credentials": {
+        "postgres": {
+          "id": "canVpLBoYXqrBa2Y",
+          "name": "Postgres Writer"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE odoo_sync_log\nSET status = 'error',\n    error_message = '{{ $json.message || $json.error }}',\n    attempts = COALESCE(attempts, 0) + 1,\n    updated_at = NOW()\nWHERE event_id = '{{ $(\"Build Bodies\").item.json.event_id || $(\"Was Claimed?\").item.json.event_id }}'",
+        "options": {}
+      },
+      "id": "33ed9304-349a-4ab7-86ae-98a616c53ec2",
+      "name": "Mark Error",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.3,
+      "position": [1264, 672],
+      "credentials": {
+        "postgres": {
+          "id": "canVpLBoYXqrBa2Y",
+          "name": "Postgres Writer"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.ODOO_URL }}/web/session/authenticate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ jsonrpc: '2.0', method: 'call', params: { db: $env.ODOO_DB, login: $env.ODOO_LOGIN, password: $env.ODOO_PASSWORD } }) }}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "099b789e-3b4c-4df1-8ed8-9ec0d3b3cb33",
+      "name": "Odoo Auth",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [608, 352],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.ODOO_URL }}/web/dataset/call_kw",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Cookie",
+              "value": "={{ ($json.headers['set-cookie'] || [''])[0].split(';')[0] }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $('Build Bodies').item.json.searchBody }}",
+        "options": {}
+      },
+      "id": "90f39f13-9304-443a-b412-e5b70fc4bd66",
+      "name": "Search Lead HTTP",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [768, 624],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.ODOO_URL }}/web/dataset/call_kw",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Cookie",
+              "value": "={{ ($('Odoo Auth').item.json.headers['set-cookie'] || [''])[0].split(';')[0] }}"
+            }
+          ]
+        },
+        "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ $('Build Bodies').item.json.createBody }}",
         "options": {}
       },
+      "id": "864ad91d-ed60-496e-90ff-4f3913936584",
+      "name": "Create Lead HTTP",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1040, 448],
       "onError": "continueErrorOutput"
-    },
-    {
-      "id": "node-build-bodies",
-      "name": "Build Bodies",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1340,
-        100
-      ],
-      "parameters": {
-        "jsCode": "const { email, event_id } = $input.item.json;\nconst searchBody = JSON.stringify({\n  jsonrpc: '2.0', method: 'call',\n  params: {\n    model: 'crm.lead', method: 'search_read',\n    args: [[['email_from', '=', email]]],\n    kwargs: { fields: ['id', 'email_from', 'name'], limit: 1, context: {} }\n  }\n});\nconst createBody = JSON.stringify({\n  jsonrpc: '2.0', method: 'call',\n  params: {\n    model: 'crm.lead', method: 'create',\n    args: [[{ name: email, email_from: email, description: 'Captured via Zentria Tracking SDK', type: 'lead' }]],\n    kwargs: { context: {} }\n  }\n});\nreturn [{ json: { email, event_id, searchBody, createBody } }];"
-      }
     }
   ],
+  "pinData": {},
   "connections": {
     "Schedule Trigger": {
-      "main": [
-        [
-          {
-            "node": "Fetch Unprocessed Events",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{ "node": "Fetch Unprocessed Events", "type": "main", "index": 0 }]]
     },
     "Fetch Unprocessed Events": {
-      "main": [
-        [
-          {
-            "node": "Has Items?",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{ "node": "Has Items?", "type": "main", "index": 0 }]]
     },
     "Has Items?": {
-      "main": [
-        [
-          {
-            "node": "Normalize Email",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        []
-      ]
+      "main": [[{ "node": "Normalize Email", "type": "main", "index": 0 }]]
     },
     "Normalize Email": {
-      "main": [
-        [
-          {
-            "node": "Claim Event",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{ "node": "Claim Event", "type": "main", "index": 0 }]]
     },
     "Claim Event": {
-      "main": [
-        [
-          {
-            "node": "Was Claimed?",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{ "node": "Was Claimed?", "type": "main", "index": 0 }]]
     },
     "Was Claimed?": {
-      "main": [
-        [
-          {
-            "node": "Build Bodies",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        []
-      ]
+      "main": [[{ "node": "Build Bodies", "type": "main", "index": 0 }]]
     },
     "Build Bodies": {
-      "main": [
-        [
-          {
-            "node": "Odoo Auth",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{ "node": "Odoo Auth", "type": "main", "index": 0 }]]
     },
     "Odoo Auth": {
       "main": [
-        [
-          {
-            "node": "Search Lead HTTP",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Mark Error",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        [{ "node": "Search Lead HTTP", "type": "main", "index": 0 }],
+        [{ "node": "Mark Error", "type": "main", "index": 0 }]
       ]
     },
     "Search Lead HTTP": {
       "main": [
-        [
-          {
-            "node": "Lead Exists?",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Mark Error",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        [{ "node": "Lead Exists?", "type": "main", "index": 0 }],
+        [{ "node": "Mark Error", "type": "main", "index": 0 }]
       ]
     },
     "Lead Exists?": {
       "main": [
-        [
-          {
-            "node": "Mark Duplicate",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Create Lead HTTP",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        [{ "node": "Add Revisit Note", "type": "main", "index": 0 }],
+        [{ "node": "Create Lead HTTP", "type": "main", "index": 0 }]
+      ]
+    },
+    "Add Revisit Note": {
+      "main": [
+        [{ "node": "Mark Duplicate", "type": "main", "index": 0 }],
+        [{ "node": "Mark Duplicate", "type": "main", "index": 0 }]
       ]
     },
     "Create Lead HTTP": {
       "main": [
-        [
-          {
-            "node": "Mark Created",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Mark Error",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        [{ "node": "Mark Created", "type": "main", "index": 0 }],
+        [{ "node": "Mark Error", "type": "main", "index": 0 }]
       ]
     }
   },
+  "active": true,
   "settings": {
     "executionOrder": "v1",
+    "binaryMode": "separate",
     "saveManualExecutions": true,
     "callerPolicy": "workflowsFromSameOwner",
     "errorWorkflow": ""
   },
-  "staticData": {
-    "node:Schedule Trigger": {
-      "recurrenceRules": []
-    }
-  }
+  "versionId": "227a1aff-e15e-438e-8754-ba9f649748c5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9f9f5111f7b27a781f1f1ddde5ebc2dd2b796bfc7365c9c28b548e564176929f"
+  },
+  "id": "BuKj774kGbQnpZ03",
+  "tags": []
 }

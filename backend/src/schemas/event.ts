@@ -22,6 +22,7 @@ export const CtaClickEventDataSchema = z.object({
 export const IdentityLinkedEventDataSchema = z.object({
   known_id: z.string().max(255),
   linked_at: z.string().datetime(),
+  email: z.string().email().max(254).optional(),
 });
 
 export const FormStartEventDataSchema = z.object({
@@ -33,7 +34,11 @@ export const FormSubmitEventDataSchema = z.object({
   formId: z.string().optional().nullable(),
   formAction: z.string().optional().nullable(),
   durationMs: z.number().int().optional().nullable(),
-});
+  email: z.string().optional().nullable(),
+  name: z.string().optional().nullable(),
+  phone: z.string().optional().nullable(),
+  message: z.string().max(500).optional().nullable(),
+}).passthrough();
 
 export const FormAbandonEventDataSchema = z.object({
   formId: z.string().optional().nullable(),

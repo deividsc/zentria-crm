@@ -207,6 +207,7 @@ function handleFormSubmit(
   const email = emailInput?.value?.trim() || extractFormField(form, ['email', 'mail', 'correo']);
   const name = extractFormField(form, ['name', 'nombre', 'fullname', 'full_name', 'firstname', 'first_name', 'lastname', 'last_name']);
   const phone = extractFormField(form, ['phone', 'tel', 'telephone', 'telefono', 'celular', 'mobile']);
+  const message = extractFormField(form, ['message', 'mensaje', 'comment', 'comments', 'texto', 'text', 'description', 'descripcion']);
 
   emit(
     'form_submit',
@@ -217,6 +218,7 @@ function handleFormSubmit(
       email: email || undefined,
       name: name || undefined,
       phone: phone || undefined,
+      message: message || undefined,
     },
     anonymousId,
     knownId,

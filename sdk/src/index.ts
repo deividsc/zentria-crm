@@ -146,9 +146,11 @@ export function identifyUser(knownId: string, traits?: Record<string, unknown>):
   }
 
   identify(knownId, traits);
+  const isEmail = knownId.includes('@');
   track('identity_linked', {
     known_id: knownId,
     linked_at: new Date().toISOString(),
+    ...(isEmail ? { email: knownId } : {}),
   });
   debug('Identified user:', knownId, traits);
 }

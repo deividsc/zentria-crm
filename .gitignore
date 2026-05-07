@@ -9,6 +9,9 @@
 *.pem
 *.key
 
+# Claude Code local settings (may contain credentials in allowed commands)
+.claude/
+
 # Odoo
 odoo-data/
 filestore/
