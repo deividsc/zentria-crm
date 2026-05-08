@@ -1,0 +1,282 @@
+{
+  "name": "Webform to Odoo Lead (UTM)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead-webform",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "node-webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-1200, 0],
+      "webhookId": "zentria-lead-webform"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "typeValidation": "loose", "version": 1 },
+          "conditions": [
+            {
+              "id": "cond-firstname",
+              "leftValue": "={{ $json.body.firstname }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "notEmpty" }
+            },
+            {
+              "id": "cond-email",
+              "leftValue": "={{ $json.body.email }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "notEmpty" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "node-validate",
+      "name": "Validate Fields",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-960, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"error\": \"Missing required fields: firstname and email are required\" }",
+        "options": { "responseCode": 400 }
+      },
+      "id": "node-400",
+      "name": "400 Bad Request",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [-960, 240]
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $('Webhook').item.json.body;\n\nreturn [{\n  json: {\n    firstname:           (body.firstname    || '').trim(),\n    lastname:            (body.lastname     || '').trim(),\n    email:               (body.email        || '').trim().toLowerCase(),\n    phone:               (body.phone        || '').trim(),\n    dni:                 (body.dni          || '').trim().toUpperCase(),\n    adult:               (body.adult        || '').trim(),\n    has_dni:             (body.has_dni      || '').trim(),\n    estudios:            (body.estudios     || '').trim(),\n    direccion:           (body.direccion    || '').trim(),\n    trabajo:             (body.trabajo      || '').trim(),\n    disqualified:        body.disqualified  === true,\n    disqualify_reasons:  Array.isArray(body.disqualify_reasons) ? body.disqualify_reasons : [],\n    source:              (body.source       || '').trim(),\n    medium:              (body.medium       || '').trim(),\n    campaign:            (body.campaign     || '').trim(),\n  }\n}];"
+      },
+      "id": "node-normalize",
+      "name": "Normalize Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-720, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://odoo:8069/web/session/authenticate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"jsonrpc\": \"2.0\", \"method\": \"call\", \"params\": { \"db\": \"odoo\", \"login\": \"admin\", \"password\": \"admin\" } }",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "node-auth",
+      "name": "Odoo Auth",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-480, 0],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Guardamos cookie y datos normalizados para pasarlos a los lookups\nconst cookie = ($json.headers['set-cookie'] || [''])[0].split(';')[0];\nconst norm = $('Normalize Data').item.json;\n\nreturn [{ json: { ...norm, cookie } }];"
+      },
+      "id": "node-store-cookie",
+      "name": "Store Cookie",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-240, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://odoo:8069/web/dataset/call_kw",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Cookie", "value": "={{ $json.cookie }}" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ jsonrpc: '2.0', method: 'call', params: { model: 'utm.source', method: 'search_read', args: [[['name', '=', $json.source]]], kwargs: { fields: ['id', 'name'], limit: 1, context: {} } } }) }}",
+        "options": {}
+      },
+      "id": "node-utm-source",
+      "name": "UTM Source Lookup",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [0, 0],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extraemos source_id y pasamos todo al siguiente lookup\nconst prev = $('Store Cookie').item.json;\nconst result = $json.result || [];\nconst sourceId = result.length > 0 ? result[0].id : null;\n\nreturn [{ json: { ...prev, sourceId } }];"
+      },
+      "id": "node-after-source",
+      "name": "After Source",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [240, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://odoo:8069/web/dataset/call_kw",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Cookie", "value": "={{ $json.cookie }}" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ jsonrpc: '2.0', method: 'call', params: { model: 'utm.medium', method: 'search_read', args: [[['name', '=', $json.medium]]], kwargs: { fields: ['id', 'name'], limit: 1, context: {} } } }) }}",
+        "options": {}
+      },
+      "id": "node-utm-medium",
+      "name": "UTM Medium Lookup",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 0],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extraemos medium_id y pasamos todo al siguiente lookup\nconst prev = $('After Source').item.json;\nconst result = $json.result || [];\nconst mediumId = result.length > 0 ? result[0].id : null;\n\nreturn [{ json: { ...prev, mediumId } }];"
+      },
+      "id": "node-after-medium",
+      "name": "After Medium",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [720, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://odoo:8069/web/dataset/call_kw",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Cookie", "value": "={{ $json.cookie }}" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ jsonrpc: '2.0', method: 'call', params: { model: 'utm.campaign', method: 'search_read', args: [[['name', '=', $json.campaign]]], kwargs: { fields: ['id', 'name'], limit: 1, context: {} } } }) }}",
+        "options": {}
+      },
+      "id": "node-utm-campaign",
+      "name": "UTM Campaign Lookup",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [960, 0],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $('After Medium').item.json;\nconst result = $json.result || [];\nconst campaignId = result.length > 0 ? result[0].id : null;\n\nconst fullName = [prev.firstname, prev.lastname].filter(Boolean).join(' ');\n\n// Construir descripción con todos los datos del formulario\nconst estudiosLabels = {\n  sin_estudios: 'Sin estudios',\n  primaria: 'Educación Primaria',\n  eso: 'ESO',\n  bachillerato: 'Bachillerato',\n  fp_basica: 'FP Básica',\n  fp_media: 'FP de Grado Medio',\n  fp_superior: 'FP de Grado Superior',\n  universidad: 'Universidad (Grado/Licenciatura)',\n  posgrado: 'Máster / Posgrado',\n  doctorado: 'Doctorado',\n};\n\nconst lines = [\n  `DNI/NIE: ${prev.dni}`,\n  `Mayor de 18 años: ${prev.adult === 'si' ? 'Sí' : 'No'}`,\n  `Posee DNI/NIE español: ${prev.has_dni === 'si' ? 'Sí' : 'No'}`,\n  `Nivel de estudios: ${estudiosLabels[prev.estudios] || prev.estudios}`,\n  `Dirección: ${prev.direccion}`,\n];\n\nif (prev.trabajo) lines.push(`Trabajo actual: ${prev.trabajo}`);\n\nif (prev.disqualified && prev.disqualify_reasons.length > 0) {\n  lines.push(`⚠️ DESCALIFICADO: ${prev.disqualify_reasons.join(', ')}`);\n}\n\nconst description = lines.join('\\n');\n\nconst leadValues = {\n  name:         fullName || prev.email,\n  contact_name: fullName,\n  email_from:   prev.email,\n  phone:        prev.phone || false,\n  description:  description,\n  type:         'lead',\n  priority:     prev.disqualified ? '0' : '1',\n};\n\nif (prev.sourceId)  leadValues.source_id   = prev.sourceId;\nif (prev.mediumId)  leadValues.medium_id   = prev.mediumId;\nif (campaignId)     leadValues.campaign_id = campaignId;\n\nconst createBody = JSON.stringify({\n  jsonrpc: '2.0',\n  method: 'call',\n  params: {\n    model: 'crm.lead',\n    method: 'create',\n    args: [leadValues],\n    kwargs: { context: {} }\n  }\n});\n\nreturn [{ json: { createBody, cookie: prev.cookie, disqualified: prev.disqualified } }];"
+      },
+      "id": "node-build-lead",
+      "name": "Build Lead Object",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1200, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://odoo:8069/web/dataset/call_kw",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Cookie", "value": "={{ $json.cookie }}" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.createBody }}",
+        "options": {}
+      },
+      "id": "node-create-lead",
+      "name": "Create Lead in Odoo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1440, 0],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ status: 'ok', lead_id: $json.result }) }}",
+        "options": { "responseCode": 200 }
+      },
+      "id": "node-200",
+      "name": "200 OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1680, -120]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"error\": \"Failed to create lead in Odoo\" }",
+        "options": { "responseCode": 500 }
+      },
+      "id": "node-500",
+      "name": "500 Odoo Error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1680, 120]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Validate Fields", "type": "main", "index": 0 }]]
+    },
+    "Validate Fields": {
+      "main": [
+        [{ "node": "Normalize Data",  "type": "main", "index": 0 }],
+        [{ "node": "400 Bad Request", "type": "main", "index": 0 }]
+      ]
+    },
+    "Normalize Data":    { "main": [[{ "node": "Odoo Auth",          "type": "main", "index": 0 }]] },
+    "Odoo Auth":         { "main": [[{ "node": "Store Cookie",        "type": "main", "index": 0 }]] },
+    "Store Cookie":      { "main": [[{ "node": "UTM Source Lookup",   "type": "main", "index": 0 }]] },
+    "UTM Source Lookup": { "main": [[{ "node": "After Source",        "type": "main", "index": 0 }]] },
+    "After Source":      { "main": [[{ "node": "UTM Medium Lookup",   "type": "main", "index": 0 }]] },
+    "UTM Medium Lookup": { "main": [[{ "node": "After Medium",        "type": "main", "index": 0 }]] },
+    "After Medium":      { "main": [[{ "node": "UTM Campaign Lookup", "type": "main", "index": 0 }]] },
+    "UTM Campaign Lookup": { "main": [[{ "node": "Build Lead Object", "type": "main", "index": 0 }]] },
+    "Build Lead Object": { "main": [[{ "node": "Create Lead in Odoo", "type": "main", "index": 0 }]] },
+    "Create Lead in Odoo": {
+      "main": [
+        [{ "node": "200 OK",         "type": "main", "index": 0 }],
+        [{ "node": "500 Odoo Error", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": ["zentria", "leads", "odoo"]
+}

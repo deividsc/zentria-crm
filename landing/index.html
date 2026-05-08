@@ -422,27 +422,131 @@ tracker.identify(<span class="text-[#10B981]">'user_456'</span>, {
             </div>
         </div>
     </section>
-    <!-- Final CTA -->
-    <section class="py-24 bg-gradient-to-br from-surface-container-high to-surface-container-highest px-6">
-        <div class="max-w-[600px] mx-auto text-center">
-            <h2 class="font-h2 text-3xl md:text-h2 text-on-surface mb-4">Ready to start tracking?</h2>
-            <p class="font-body text-body text-on-surface-variant mb-8">Join thousands of developers building better products with Zentria.</p>
-            <form action="#" class="flex flex-col sm:flex-row gap-4 justify-center max-w-[500px] mx-auto mb-8">
-                <input class="flex-1 h-12 px-4 rounded-lg border border-outline focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 font-body text-body text-on-surface bg-white" placeholder="Enter your email" required="" type="email"/>
-                <button class="h-12 bg-primary-container text-on-primary-container font-label text-label px-6 rounded-lg hover:opacity-90 transition-opacity active:scale-95 shadow-sm whitespace-nowrap" type="submit">
-                            Get Started
-                        </button>
-            </form>
-            <div class="flex flex-wrap justify-center items-center gap-6 text-sm text-on-surface-variant">
-                <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-surface-tint">verified_user</span>
-                    <span class="font-label text-label">GDPR Compliant</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-surface-tint">lock</span>
-                    <span class="font-label text-label">256-bit encryption</span>
-                </div>
+    <!-- Final CTA / Contact Form -->
+    <section id="contact" class="py-24 bg-gradient-to-br from-surface-container-high to-surface-container-highest px-6">
+        <div class="max-w-[680px] mx-auto">
+            <div class="text-center mb-10">
+                <h2 class="font-h2 text-3xl md:text-h2 text-on-surface mb-4">Solicita información</h2>
+                <p class="font-body text-body text-on-surface-variant">Rellena el formulario y nos ponemos en contacto contigo en menos de 24 horas.</p>
             </div>
+
+            <!-- Success state -->
+            <div id="form-success" class="hidden bg-white border border-outline-variant rounded-xl p-10 text-center shadow-[0_1px_3px_rgba(0,0,0,0.1)]">
+                <span class="material-symbols-outlined text-surface-tint text-[48px] mb-4 block" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                <h3 class="font-h3 text-h3 text-on-surface mb-2">¡Solicitud recibida!</h3>
+                <p class="font-body text-body text-on-surface-variant">Nos pondremos en contacto contigo en breve.</p>
+            </div>
+
+            <!-- Error box -->
+            <div id="form-error" class="hidden mb-4 bg-error-container border border-error rounded-lg px-4 py-3 text-on-error-container font-body text-body text-sm"></div>
+
+            <!-- Form -->
+            <form id="contact-form" class="bg-white border border-outline-variant rounded-xl p-8 shadow-[0_1px_3px_rgba(0,0,0,0.1)] flex flex-col gap-5" novalidate>
+
+                <!-- Nombre y Email -->
+                <div class="grid sm:grid-cols-2 gap-5">
+                    <div class="flex flex-col gap-1.5">
+                        <label class="font-label text-label text-on-surface" for="cf-name">Nombre completo <span class="text-error">*</span></label>
+                        <input id="cf-name" name="name" type="text" required placeholder="Juan García"
+                            class="h-12 px-4 rounded-lg border border-outline focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 font-body text-body text-on-surface bg-white outline-none transition"/>
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label class="font-label text-label text-on-surface" for="cf-email">Email <span class="text-error">*</span></label>
+                        <input id="cf-email" name="email" type="email" required placeholder="juan@email.com"
+                            class="h-12 px-4 rounded-lg border border-outline focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 font-body text-body text-on-surface bg-white outline-none transition"/>
+                    </div>
+                </div>
+
+                <!-- Teléfono y DNI -->
+                <div class="grid sm:grid-cols-2 gap-5">
+                    <div class="flex flex-col gap-1.5">
+                        <label class="font-label text-label text-on-surface" for="cf-phone">Teléfono <span class="text-error">*</span></label>
+                        <input id="cf-phone" name="phone" type="tel" required placeholder="+34 600 000 000"
+                            class="h-12 px-4 rounded-lg border border-outline focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 font-body text-body text-on-surface bg-white outline-none transition"/>
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label class="font-label text-label text-on-surface" for="cf-dni">DNI / NIE <span class="text-error">*</span></label>
+                        <input id="cf-dni" name="dni" type="text" required placeholder="12345678A o X1234567A"
+                            class="h-12 px-4 rounded-lg border border-outline focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 font-body text-body text-on-surface bg-white outline-none transition"/>
+                    </div>
+                </div>
+
+                <!-- Mayor de edad y tiene DNI/NIE -->
+                <div class="grid sm:grid-cols-2 gap-5">
+                    <div class="flex flex-col gap-1.5">
+                        <label class="font-label text-label text-on-surface">¿Eres mayor de 18 años? <span class="text-error">*</span></label>
+                        <div class="flex gap-4 mt-1">
+                            <label class="flex items-center gap-2 cursor-pointer font-body text-body text-on-surface">
+                                <input type="radio" name="adult" value="si" required class="accent-primary-container w-4 h-4"/> Sí
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer font-body text-body text-on-surface">
+                                <input type="radio" name="adult" value="no" class="accent-primary-container w-4 h-4"/> No
+                            </label>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label class="font-label text-label text-on-surface">¿Posees DNI o NIE español? <span class="text-error">*</span></label>
+                        <div class="flex gap-4 mt-1">
+                            <label class="flex items-center gap-2 cursor-pointer font-body text-body text-on-surface">
+                                <input type="radio" name="has_dni" value="si" required class="accent-primary-container w-4 h-4"/> Sí
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer font-body text-body text-on-surface">
+                                <input type="radio" name="has_dni" value="no" class="accent-primary-container w-4 h-4"/> No
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nivel de estudios -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="font-label text-label text-on-surface" for="cf-estudios">Nivel de estudios <span class="text-error">*</span></label>
+                    <select id="cf-estudios" name="estudios" required
+                        class="h-12 px-4 rounded-lg border border-outline focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 font-body text-body text-on-surface bg-white outline-none transition">
+                        <option value="">Selecciona una opción</option>
+                        <option value="sin_estudios">Sin estudios</option>
+                        <option value="primaria">Educación Primaria</option>
+                        <option value="eso">ESO</option>
+                        <option value="bachillerato">Bachillerato</option>
+                        <option value="fp_basica">FP Básica</option>
+                        <option value="fp_media">FP de Grado Medio</option>
+                        <option value="fp_superior">FP de Grado Superior</option>
+                        <option value="universidad">Universidad (Grado/Licenciatura)</option>
+                        <option value="posgrado">Máster / Posgrado</option>
+                        <option value="doctorado">Doctorado</option>
+                    </select>
+                </div>
+
+                <!-- Dirección -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="font-label text-label text-on-surface" for="cf-direccion">Dirección <span class="text-error">*</span></label>
+                    <input id="cf-direccion" name="direccion" type="text" required placeholder="Calle Mayor 1, 28001 Madrid"
+                        class="h-12 px-4 rounded-lg border border-outline focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 font-body text-body text-on-surface bg-white outline-none transition"/>
+                </div>
+
+                <!-- Trabajo actual (opcional) -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="font-label text-label text-on-surface" for="cf-trabajo">Trabajo actual <span class="text-on-surface-variant font-normal">(opcional)</span></label>
+                    <input id="cf-trabajo" name="trabajo" type="text" placeholder="Ej: Administrativo en empresa X"
+                        class="h-12 px-4 rounded-lg border border-outline focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 font-body text-body text-on-surface bg-white outline-none transition"/>
+                </div>
+
+                <button id="cf-submit" type="submit"
+                    class="h-12 bg-primary-container text-on-primary-container font-label text-label px-6 rounded-lg hover:opacity-90 transition-opacity active:scale-95 shadow-sm flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
+                    <span id="cf-btn-text">Enviar solicitud</span>
+                    <span id="cf-btn-spinner" class="hidden material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
+                </button>
+
+                <div class="flex flex-wrap justify-center items-center gap-6 text-sm text-on-surface-variant pt-2">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-surface-tint text-[18px]">verified_user</span>
+                        <span class="font-label text-label">Cumple RGPD</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-surface-tint text-[18px]">lock</span>
+                        <span class="font-label text-label">Cifrado 256 bits</span>
+                    </div>
+                </div>
+            </form>
         </div>
     </section>
 </main>
@@ -496,16 +600,153 @@ tracker.identify(<span class="text-[#10B981]">'user_456'</span>, {
       endpoint: _cfg.endpoint || 'http://localhost:3000',
       debug: _cfg.debug !== undefined ? _cfg.debug : true,
     });
-
-    document.addEventListener('submit', function(e) {
-      const form = e.target;
-      if (!(form instanceof HTMLFormElement)) return;
-      const emailInput = form.querySelector('input[type="email"]');
-      if (!emailInput) return;
-      const email = emailInput.value.trim();
-      if (email) ZentriaTracking.identifyUser(email);
-    }, true);
   }
+</script>
+<script>
+  (function () {
+    function getUtmParams() {
+      var params = new URLSearchParams(window.location.search);
+      return {
+        source:   params.get('utm_source')   || '',
+        medium:   params.get('utm_medium')   || '',
+        campaign: params.get('utm_campaign') || '',
+      };
+    }
+
+    // DNI: 8 dígitos + letra. NIE: X/Y/Z + 7 dígitos + letra.
+    function isValidDni(value) {
+      return /^[0-9]{8}[A-Za-z]$/.test(value) || /^[XYZxyz][0-9]{7}[A-Za-z]$/.test(value);
+    }
+
+    var form     = document.getElementById('contact-form');
+    var success  = document.getElementById('form-success');
+    var errorBox = document.getElementById('form-error');
+    var submit   = document.getElementById('cf-submit');
+    var btnText  = document.getElementById('cf-btn-text');
+    var spinner  = document.getElementById('cf-btn-spinner');
+
+    var _cfg = window.ZENTRIA_CONFIG || {};
+    var WEBHOOK_URL   = _cfg.webhookUrl   || '';
+    var WEBHOOK_TOKEN = _cfg.webhookToken || '';
+
+    if (!WEBHOOK_URL) {
+      console.warn('[Zentria] webhookUrl not configured in zentria-config.js');
+    }
+
+    function setLoading(loading) {
+      submit.disabled = loading;
+      btnText.textContent = loading ? 'Enviando...' : 'Enviar solicitud';
+      spinner.classList.toggle('hidden', !loading);
+    }
+
+    function showError(msg) {
+      errorBox.textContent = msg;
+      errorBox.classList.remove('hidden');
+      errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function hideError() {
+      errorBox.classList.add('hidden');
+    }
+
+    function getRadio(name) {
+      var el = document.querySelector('input[name="' + name + '"]:checked');
+      return el ? el.value : '';
+    }
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      hideError();
+
+      var name      = document.getElementById('cf-name').value.trim();
+      var email     = document.getElementById('cf-email').value.trim();
+      var phone     = document.getElementById('cf-phone').value.trim();
+      var dni       = document.getElementById('cf-dni').value.trim().toUpperCase();
+      var adult     = getRadio('adult');
+      var has_dni   = getRadio('has_dni');
+      var estudios  = document.getElementById('cf-estudios').value;
+      var direccion = document.getElementById('cf-direccion').value.trim();
+      var trabajo   = document.getElementById('cf-trabajo').value.trim();
+
+      // Validaciones requeridas
+      if (!name)      { showError('El nombre completo es obligatorio.'); return; }
+      if (!email)     { showError('El email es obligatorio.'); return; }
+      if (!phone)     { showError('El teléfono es obligatorio.'); return; }
+      if (!dni)       { showError('El DNI / NIE es obligatorio.'); return; }
+      if (!adult)     { showError('Indica si eres mayor de 18 años.'); return; }
+      if (!has_dni)   { showError('Indica si posees DNI o NIE español.'); return; }
+      if (!estudios)  { showError('Selecciona tu nivel de estudios.'); return; }
+      if (!direccion) { showError('La dirección es obligatoria.'); return; }
+
+      // Validación formato DNI/NIE
+      if (!isValidDni(dni)) {
+        showError('El DNI debe tener 8 dígitos y una letra (ej: 12345678A). El NIE debe empezar por X, Y o Z (ej: X1234567A).');
+        return;
+      }
+
+      // Determinar si el lead está descalificado
+      var disqualified = false;
+      var disqualifyReasons = [];
+
+      if (adult === 'no') {
+        disqualified = true;
+        disqualifyReasons.push('menor de 18 años');
+      }
+      if (has_dni === 'no') {
+        disqualified = true;
+        disqualifyReasons.push('no posee DNI/NIE español');
+      }
+
+      var utms = getUtmParams();
+      var nameParts = name.split(' ');
+
+      var payload = {
+        firstname:    nameParts.slice(0, -1).join(' ') || name,
+        lastname:     nameParts.slice(-1)[0] || '',
+        email:        email,
+        phone:        phone,
+        dni:          dni,
+        adult:        adult,
+        has_dni:      has_dni,
+        estudios:     estudios,
+        direccion:    direccion,
+        trabajo:      trabajo,
+        disqualified: disqualified,
+        disqualify_reasons: disqualifyReasons,
+        source:       utms.source,
+        medium:       utms.medium,
+        campaign:     utms.campaign,
+      };
+
+      setLoading(true);
+
+      fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-webhook-token': WEBHOOK_TOKEN,
+        },
+        body: JSON.stringify(payload),
+      })
+        .then(function (res) {
+          if (!res.ok) return res.json().then(function (d) { throw new Error(d.error || 'Error del servidor'); });
+          return res.json();
+        })
+        .then(function () {
+          form.classList.add('hidden');
+          success.classList.remove('hidden');
+          if (typeof ZentriaTracking !== 'undefined') {
+            ZentriaTracking.identifyUser(email);
+          }
+        })
+        .catch(function (err) {
+          showError(err.message || 'Algo ha ido mal. Por favor, inténtalo de nuevo.');
+        })
+        .finally(function () {
+          setLoading(false);
+        });
+    });
+  })();
 </script>
 <script>
   // Mobile menu toggle
