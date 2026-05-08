@@ -72,18 +72,6 @@ for migration in "$REMOTE_DIR"/backend/src/db/migrations/*.sql; do
 done
 ok "Migraciones aplicadas"
 
-# ── Landing page (nginx) ─────────────────────────────────────
-step "Levantando landing page"
-docker rm -f zentria-landing 2>/dev/null || true
-docker run -d \
-  --name zentria-landing \
-  --restart unless-stopped \
-  --network zentria-net \
-  -p 8082:80 \
-  -v "$REMOTE_DIR/landing:/usr/share/nginx/html:ro" \
-  nginx:alpine
-ok "Landing levantada en :8082"
-
 # ── Health checks ────────────────────────────────────────────
 step "Verificando salud de los servicios (esperar hasta 60s)"
 deadline=$((SECONDS + 60))
