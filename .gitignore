@@ -5,6 +5,7 @@
 # Environment variables
 .env
 .env.local
+.env.production
 .env.*.local
 *.pem
 *.key
@@ -64,6 +65,7 @@ landing/js/sdk.iife.js
 # production: cp landing/js/zentria-config.example.js landing/js/zentria-config.js (fill values)
 landing/js/zentria-config.js
 landing/js/zentria-config.local.js
+landing/js/zentria-config.production.js
 
 # Package locks (monorepo uses root)
 package-lock.json

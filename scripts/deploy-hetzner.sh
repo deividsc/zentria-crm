@@ -19,14 +19,14 @@ if [ ! -f "docker-compose.yml" ]; then
   die "Ejecutar desde la raíz del repo zentria-crm"
 fi
 
-# ── Verificar que .env de producción existe ──────────────────
-if [ ! -f ".env" ]; then
-  die ".env no encontrado — copiá .env.example y completá los valores"
+# ── Verificar que .env.production existe ─────────────────────
+if [ ! -f ".env.production" ]; then
+  die ".env.production no encontrado — copiá .env.example, completá los valores de prod y guardalo como .env.production"
 fi
 
-# ── Verificar que zentria-config.js existe ───────────────────
-if [ ! -f "landing/js/zentria-config.js" ]; then
-  die "landing/js/zentria-config.js no encontrado — copiá zentria-config.example.js y completá los valores"
+# ── Verificar que zentria-config.production.js existe ────────
+if [ ! -f "landing/js/zentria-config.production.js" ]; then
+  die "landing/js/zentria-config.production.js no encontrado — copiá zentria-config.example.js y completá los valores de prod"
 fi
 
 # ── Verificar conexión SSH ───────────────────────────────────
@@ -53,11 +53,12 @@ tar -czf - \
 
 ok "Proyecto transferido"
 
-# ── Copiar archivos ignorados por git ────────────────────────
-step "Copiando archivos de configuración local"
-scp .env "${SSH_TARGET}:${REMOTE_DIR}/.env"
-scp landing/js/zentria-config.js "${SSH_TARGET}:${REMOTE_DIR}/landing/js/zentria-config.js"
-ok "Configuración copiada"
+
+# ── Copiar archivos de configuración de producción ────────────
+step "Copiando configuración de producción"
+scp .env.production "${SSH_TARGET}:${REMOTE_DIR}/.env"
+scp landing/js/zentria-config.production.js "${SSH_TARGET}:${REMOTE_DIR}/landing/js/zentria-config.js"
+ok "Configuración copiada (.env.production → .env, zentria-config.production.js → zentria-config.js en servidor)"
 
 # ── Ejecutar setup remoto ────────────────────────────────────
 step "Ejecutando setup en el servidor"
