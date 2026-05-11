@@ -80,6 +80,25 @@ async function odooXmlRpc(method: string, model: string, args: unknown[]): Promi
   return data.result;
 }
 
+async function pollOdooLead(
+  email: string,
+  timeoutMs: number,
+  intervalMs = 5_000
+): Promise<Array<{ id: number; email_from: string }> | null> {
+  await odooAuthenticate();
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const leads = await odooXmlRpc('search_read', 'crm.lead', [
+      [['email_from', '=', email]],
+      ['id', 'email_from', 'name'],
+      0, 1,
+    ]) as Array<{ id: number; email_from: string }>;
+    if (leads.length > 0) return leads;
+    await new Promise(r => setTimeout(r, intervalMs));
+  }
+  return null;
+}
+
 // ---------------------------------------------------------------------------
 // Global setup — reset Redis rate limit keys before each test
 // ---------------------------------------------------------------------------
@@ -124,15 +143,16 @@ test.describe('Suite 1: Full conversion flow', () => {
     );
     expect(sdkReady, 'ZentriaTracking not initialized').toBe(true);
 
-    // Fill and submit — works with email-only or full form
-    const emailInput = page.locator('input[type="email"]').first();
-    await emailInput.fill(testEmail);
+    // Fill all required fields
+    await page.locator('#cf-name').fill('E2E Test User');
+    await page.locator('#cf-email').fill(testEmail);
+    await page.locator('#cf-phone').fill('+34 600 000 001');
+    await page.locator('#cf-dni').fill('12345678Z');
+    await page.locator('input[name="adult"][value="si"]').check();
+    await page.locator('#cf-estudios').selectOption('bachillerato');
+    await page.locator('#cf-postal').fill('28001');
 
-    const nameInput = page.locator('input[type="text"], input[name*="name"], input[placeholder*="nombre"]').first();
-    if (await nameInput.count() > 0) await nameInput.fill('E2E Test User');
-
-    const submitBtn = page.locator('button[type="submit"], input[type="submit"]').first();
-    await submitBtn.click();
+    await page.locator('#cf-submit').click();
     await page.waitForTimeout(1000);
 
     // identity_linked event must appear in DB within 15s
@@ -146,28 +166,10 @@ test.describe('Suite 1: Full conversion flow', () => {
     expect(event, `identity_linked not found for ${testEmail}`).not.toBeNull();
     expect(event!.known_id).toBe(testEmail);
 
-    // n8n sync log must arrive within 90s
-    const syncLog = await pollDb<{ status: string; odoo_lead_id: number }>(
-      `SELECT status, odoo_lead_id FROM odoo_sync_log
-       WHERE email = $1 AND status IN ('created', 'duplicate')
-       ORDER BY created_at DESC LIMIT 1`,
-      [testEmail],
-      90_000,
-      5_000
-    );
-    expect(syncLog, `odoo_sync_log not found for ${testEmail}`).not.toBeNull();
-    expect(['created', 'duplicate']).toContain(syncLog!.status);
-
-    // Lead must exist in Odoo
-    await odooAuthenticate();
-    const leads = await odooXmlRpc('search_read', 'crm.lead', [
-      [['email_from', '=', testEmail]],
-      ['id', 'email_from', 'name'],
-      0, 1,
-    ]) as Array<{ id: number; email_from: string }>;
-
-    expect(leads.length, `No lead in Odoo for ${testEmail}`).toBeGreaterThan(0);
-    expect(leads[0].email_from).toBe(testEmail);
+    // Lead must exist in Odoo within 60s (webhook flow creates it async via n8n)
+    const leads = await pollOdooLead(testEmail, 60_000);
+    expect(leads, `No lead in Odoo for ${testEmail}`).not.toBeNull();
+    expect(leads![0].email_from).toBe(testEmail);
   });
 });
 

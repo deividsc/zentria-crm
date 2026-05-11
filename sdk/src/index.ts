@@ -29,6 +29,7 @@ interface SDKState {
   beaconCleanup: (() => void) | null;
   captureCleanup: (() => void) | null;
   consentGiven: boolean;
+  rateLimitedUntil: number;
 }
 
 const state: SDKState = {
@@ -39,6 +40,7 @@ const state: SDKState = {
   beaconCleanup: null,
   captureCleanup: null,
   consentGiven: false,
+  rateLimitedUntil: 0,
 };
 
 /**
@@ -82,6 +84,11 @@ export async function flush(): Promise<void> {
     return;
   }
 
+  if (Date.now() < state.rateLimitedUntil) {
+    debug(`Flush paused: rate limited for ${Math.ceil((state.rateLimitedUntil - Date.now()) / 1000)}s more`);
+    return;
+  }
+
   const events = getQueue();
   if (events.length === 0) {
     debug('Flush: no events to send');
@@ -98,7 +105,12 @@ export async function flush(): Promise<void> {
   try {
     const result = await sendBatch(events, transportConfig);
     removeEvents(new Set(result.sent));
-    debug(`Flush complete: ${result.sent.length} sent, ${result.failed.length} failed`);
+    if (result.rateLimited) {
+      state.rateLimitedUntil = Date.now() + (result.retryAfterMs ?? 60_000);
+      debug(`Rate limited — pausing flush for ${(result.retryAfterMs ?? 60_000) / 1000}s`);
+    } else {
+      debug(`Flush complete: ${result.sent.length} sent, ${result.failed.length} failed`);
+    }
   } catch (err) {
     debug('Flush error:', err);
   }

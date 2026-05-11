@@ -9,8 +9,12 @@
 *.pem
 *.key
 
-# Claude Code local settings (may contain credentials in allowed commands)
+# AI tool local settings
 .claude/
+.agents/
+.kiro/
+.continue/
+skills-lock.json
 
 # Odoo
 odoo-data/
@@ -55,8 +59,11 @@ test-results/
 # Generated SDK builds
 landing/js/sdk.iife.js
 
-# Landing environment config (copy from zentria-config.example.js)
+# Landing environment config — never commit real values
+# local dev:  cp landing/js/zentria-config.local.js landing/js/zentria-config.js
+# production: cp landing/js/zentria-config.example.js landing/js/zentria-config.js (fill values)
 landing/js/zentria-config.js
+landing/js/zentria-config.local.js
 
 # Package locks (monorepo uses root)
 package-lock.json

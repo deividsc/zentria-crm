@@ -9,7 +9,7 @@ const redis = new Redis({
 });
 
 const WINDOW_MS = 60 * 1000;
-const MAX_REQUESTS = 100;
+const MAX_REQUESTS = process.env.NODE_ENV === 'development' ? 1000 : 100;
 
 const IDENTITY_WINDOW_MS = 60 * 60 * 1000; // 1 hour
 const MAX_IDENTITY_PER_IP = 5;
