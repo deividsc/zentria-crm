@@ -1,604 +1,1222 @@
 <!DOCTYPE html>
-<html class="light" lang="en">
+<html lang="es">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<meta name="description" content="Zentria Tracking SDK - Precision conversion tracking, lead identity resolution, and AI scoring integration."/>
-<title>Zentria Tracking SDK - Precision Conversion Tracking</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<meta name="description" content="Zentria — Seguimiento de conversiones con precisión absoluta. Captura cada acción, identifica cada lead, convierte más."/>
+<title>Zentria — Seguimiento de Conversiones con Precisión</title>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    "colors": {
-                        "surface-container-highest": "#dce2f7",
-                        "background": "#f9f9ff",
-                        "on-surface-variant": "#424656",
-                        "secondary-fixed": "#d8e3fb",
-                        "on-primary-fixed": "#001849",
-                        "surface-bright": "#f9f9ff",
-                        "on-secondary-fixed": "#111c2d",
-                        "secondary": "#545f73",
-                        "on-tertiary-fixed-variant": "#832600",
-                        "inverse-primary": "#b3c5ff",
-                        "outline": "#727687",
-                        "tertiary-container": "#cc4204",
-                        "inverse-on-surface": "#edf0ff",
-                        "primary-fixed-dim": "#b3c5ff",
-                        "on-tertiary-container": "#fff6f4",
-                        "tertiary-fixed": "#ffdbd0",
-                        "on-error": "#ffffff",
-                        "secondary-fixed-dim": "#bcc7de",
-                        "on-surface": "#141b2b",
-                        "surface-container-high": "#e1e8fd",
-                        "on-primary": "#ffffff",
-                        "error": "#ba1a1a",
-                        "surface-tint": "#0054d6",
-                        "primary": "#0050cb",
-                        "primary-fixed": "#dae1ff",
-                        "surface-container-lowest": "#ffffff",
-                        "on-tertiary": "#ffffff",
-                        "surface": "#f9f9ff",
-                        "primary-container": "#0066ff",
-                        "on-primary-fixed-variant": "#003fa4",
-                        "on-primary-container": "#f8f7ff",
-                        "on-secondary-container": "#586377",
-                        "inverse-surface": "#293040",
-                        "surface-container-low": "#f1f3ff",
-                        "on-tertiary-fixed": "#390c00",
-                        "tertiary": "#a33200",
-                        "surface-container": "#e9edff",
-                        "on-error-container": "#93000a",
-                        "on-secondary": "#ffffff",
-                        "error-container": "#ffdad6",
-                        "surface-dim": "#d3daef",
-                        "outline-variant": "#c2c6d8",
-                        "tertiary-fixed-dim": "#ffb59d",
-                        "on-background": "#141b2b",
-                        "on-secondary-fixed-variant": "#3c475a",
-                        "surface-variant": "#dce2f7",
-                        "secondary-container": "#d5e0f8"
-                    },
-                    "borderRadius": {
-                        "DEFAULT": "0.25rem",
-                        "lg": "0.5rem",
-                        "xl": "0.75rem",
-                        "full": "9999px"
-                    },
-                    "spacing": {
-                        "base": "4px",
-                        "margin": "32px",
-                        "lg": "24px",
-                        "md": "16px",
-                        "sm": "8px",
-                        "gutter": "24px",
-                        "xs": "4px",
-                        "xl": "32px"
-                    },
-                    "fontFamily": {
-                        "h2": ["Inter"],
-                        "label": ["Inter"],
-                        "code": ["monospace"],
-                        "body": ["Inter"],
-                        "h3": ["Inter"],
-                        "h1": ["Inter"]
-                    },
-                    "fontSize": {
-                        "h2": ["40px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
-                        "label": ["14px", { "lineHeight": "1.4", "fontWeight": "500" }],
-                        "code": ["14px", { "lineHeight": "1.6", "fontWeight": "400" }],
-                        "body": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }],
-                        "h3": ["24px", { "lineHeight": "1.3", "fontWeight": "600" }],
-                        "h1": ["56px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }]
-                    }
-                }
-            }
-        }
-    </script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    /* ── Secciones claras ── */
+    --bg:        #f8f9fc;
+    --bg-card:   #ffffff;
+    --bg-raised: #f1f3f8;
+    --border:    rgba(0,0,0,0.08);
+    --border-hi: rgba(245,158,11,0.4);
+    --text:      #111827;
+    --text-muted:#6b7280;
+    --white:     #ffffff;
+
+    /* ── Secciones oscuras ── */
+    --dark-bg:       #111827;
+    --dark-card:     #1f2937;
+    --dark-raised:   #374151;
+    --dark-border:   rgba(255,255,255,0.08);
+    --dark-text:     #f9fafb;
+    --dark-muted:    #9ca3af;
+
+    /* ── Acento ── */
+    --amber:     #f59e0b;
+    --amber-dim: #d97706;
+    --amber-glow:rgba(245,158,11,0.12);
+
+    --error:     #ef4444;
+    --success:   #10b981;
+    --radius:    12px;
+    --radius-sm: 8px;
+    --radius-lg: 20px;
+  }
+
   html { scroll-behavior: smooth; }
-  #mobile-menu a, #mobile-menu button { transition: color 0.2s; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Scrollbar ─────────────────────────── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg-raised); }
+  ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+
+  /* ── Typography ────────────────────────── */
+  .display { font-family: 'Playfair Display', serif; }
+  h1,h2,h3 { font-family: 'Playfair Display', serif; line-height: 1.1; }
+  h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 900; letter-spacing: -0.02em; }
+  h2 { font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; letter-spacing: -0.02em; }
+  h3 { font-size: 1.35rem; font-weight: 700; }
+  p  { color: var(--text-muted); line-height: 1.7; }
+  code, pre { font-family: 'DM Mono', monospace; }
+
+  .amber { color: var(--amber); }
+  .text-muted { color: var(--text-muted); }
+
+  /* ── Layout ─────────────────────────────── */
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+  .section { padding: 100px 0; }
+
+  /* ── Gradient bg mesh (hero only) ──────── */
+  #hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 70% 60% at 10% 0%, rgba(245,158,11,0.07) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 40% at 90% 100%, rgba(99,102,241,0.04) 0%, transparent 55%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Cards ─────────────────────────────── */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+  }
+  .card:hover {
+    border-color: var(--border-hi);
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.1), 0 0 0 1px rgba(245,158,11,0.15);
+  }
+
+  /* ── Buttons ────────────────────────────── */
+  .btn-primary {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--amber);
+    color: #0a0a0f;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 14px 28px;
+    border-radius: var(--radius-sm);
+    border: none; cursor: pointer;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 0 0 0 rgba(245,158,11,0);
+    text-decoration: none;
+  }
+  .btn-primary:hover {
+    background: #fbbf24;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 25px rgba(245,158,11,0.35);
+  }
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-ghost {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    background: transparent;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 0.95rem;
+    padding: 14px 28px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    text-decoration: none;
+  }
+  .btn-ghost:hover {
+    border-color: rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.04);
+    transform: translateY(-1px);
+  }
+
+  /* ── Pill / Badge ───────────────────────── */
+  .pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--amber-glow);
+    border: 1px solid rgba(245,158,11,0.25);
+    color: var(--amber);
+    font-size: 0.78rem; font-weight: 600;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 6px 14px; border-radius: 999px;
+  }
+
+  /* ── Divider line ───────────────────────── */
+  .divider { border: none; border-top: 1px solid var(--border); }
+
+  /* ── Animations ─────────────────────────── */
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(24px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity:0; }
+    to   { opacity:1; }
+  }
+  @keyframes pulse-glow {
+    0%,100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.3); }
+    50%      { box-shadow: 0 0 0 8px rgba(245,158,11,0); }
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .anim-up  { animation: fadeUp 0.7s ease both; }
+  .anim-in  { animation: fadeIn 0.7s ease both; }
+  .delay-1  { animation-delay: 0.1s; }
+  .delay-2  { animation-delay: 0.2s; }
+  .delay-3  { animation-delay: 0.3s; }
+  .delay-4  { animation-delay: 0.4s; }
+  .delay-5  { animation-delay: 0.5s; }
+
+  .spin { animation: spin 1s linear infinite; }
+
+  /* ── NAV ─────────────────────────────────── */
+  #nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(248,249,252,0.92);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 68px;
+  }
+  .nav-logo {
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem; font-weight: 800;
+    color: var(--text); text-decoration: none;
+  }
+  .nav-logo .dot { color: var(--amber); }
+  .nav-links { display: flex; align-items: center; gap: 36px; }
+  .nav-links a {
+    color: var(--text-muted); font-weight: 500; font-size: 0.9rem;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--white); }
+  #menu-btn {
+    display: none; background: none; border: none;
+    color: var(--text); cursor: pointer; padding: 8px;
+  }
+  #mobile-menu {
+    display: none; flex-direction: column; gap: 16px;
+    padding: 20px 24px;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+  }
+  #mobile-menu a {
+    color: var(--text-muted); font-weight: 500;
+    text-decoration: none; padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    transition: color 0.2s;
+  }
+  #mobile-menu a:hover { color: var(--white); }
+
+  @media (max-width: 768px) {
+    .nav-links, .nav-cta { display: none; }
+    #menu-btn { display: flex; }
+  }
+
+  /* ── HERO ────────────────────────────────── */
+  #hero {
+    position: relative; overflow: hidden;
+    padding: 120px 0 80px;
+  }
+  #hero::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 0; right: 0;
+    height: 120px;
+    background: linear-gradient(to bottom, transparent, var(--bg));
+    pointer-events: none;
+  }
+  .hero-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 64px; align-items: center;
+  }
+  .hero-eyebrow { margin-bottom: 20px; }
+  .hero-title { margin-bottom: 24px; }
+  .hero-title em { font-style: italic; color: var(--amber); }
+  .hero-desc { font-size: 1.1rem; margin-bottom: 36px; max-width: 480px; }
+  .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 40px; }
+  .hero-trust {
+    display: flex; align-items: center; gap: 20px;
+    font-size: 0.85rem; color: var(--text-muted);
+  }
+  .hero-trust-item { display: flex; align-items: center; gap: 6px; }
+  .hero-trust-item .material-symbols-outlined { font-size: 16px; color: var(--amber); }
+
+  /* Dashboard mockup */
+  .hero-visual {
+    position: relative;
+    background: var(--dark-bg);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+  .mockup-bar {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 20px;
+  }
+  .mockup-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .mockup-dot:nth-child(1) { background: #ef4444; }
+  .mockup-dot:nth-child(2) { background: #f59e0b; }
+  .mockup-dot:nth-child(3) { background: #10b981; }
+  .mockup-stats {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px;
+  }
+  .mockup-stat {
+    background: var(--dark-card);
+    border: 1px solid var(--dark-border);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+  }
+  .mockup-stat-label { font-size: 0.7rem; color: var(--dark-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+  .mockup-stat-value { font-size: 1.3rem; font-weight: 700; color: #f9fafb; font-family: 'DM Mono', monospace; }
+  .mockup-stat-delta { font-size: 0.72rem; color: var(--success); margin-top: 2px; }
+  .mockup-chart {
+    background: var(--dark-card);
+    border: 1px solid var(--dark-border);
+    border-radius: var(--radius-sm);
+    padding: 16px; height: 110px;
+    display: flex; align-items: flex-end; gap: 5px; overflow: hidden;
+  }
+  .chart-bar {
+    flex: 1; background: rgba(245,158,11,0.15);
+    border-radius: 3px 3px 0 0;
+    border: 1px solid rgba(245,158,11,0.2);
+  }
+  .chart-bar.hi { background: rgba(245,158,11,0.35); border-color: rgba(245,158,11,0.55); }
+  .mockup-events {
+    margin-top: 12px;
+    background: var(--dark-card);
+    border: 1px solid var(--dark-border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+  }
+  .event-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 14px; font-size: 0.78rem;
+    border-bottom: 1px solid var(--dark-border);
+  }
+  .event-row:last-child { border-bottom: none; }
+  .event-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .event-dot.green  { background: var(--success); box-shadow: 0 0 6px var(--success); }
+  .event-dot.amber  { background: var(--amber);   box-shadow: 0 0 6px var(--amber); }
+  .event-dot.purple { background: #a78bfa;        box-shadow: 0 0 6px #a78bfa; }
+  .event-name { color: #f9fafb; font-weight: 500; flex: 1; }
+  .event-time { color: var(--dark-muted); font-family: 'DM Mono', monospace; font-size: 0.72rem; }
+
+  @media (max-width: 900px) {
+    .hero-grid { grid-template-columns: 1fr; }
+    .hero-visual { display: none; }
+  }
+
+  /* ── LOGO BAR ────────────────────────────── */
+  #logos {
+    padding: 40px 0;
+    background: var(--bg-raised);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .logos-label {
+    text-align: center;
+    font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--text-muted);
+    margin-bottom: 24px;
+  }
+  .logos-row {
+    display: flex; justify-content: center; align-items: center;
+    gap: 48px; flex-wrap: wrap; opacity: 0.35;
+  }
+  .logos-row span {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem; font-weight: 700; color: var(--text);
+    letter-spacing: -0.01em;
+  }
+
+  /* ── FEATURES ────────────────────────────── */
+  #features { position: relative; }
+  .section-header { text-align: center; max-width: 600px; margin: 0 auto 64px; }
+  .section-header p { font-size: 1.05rem; margin-top: 16px; }
+  .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .feature-card { padding: 36px 32px; }
+  .feature-icon {
+    width: 52px; height: 52px;
+    background: var(--amber-glow);
+    border: 1px solid rgba(245,158,11,0.2);
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 24px;
+  }
+  .feature-icon .material-symbols-outlined { color: var(--amber); font-size: 22px; }
+  .feature-card h3 { margin-bottom: 12px; color: var(--white); }
+  .feature-card p { font-size: 0.95rem; }
+
+  @media (max-width: 900px) { .features-grid { grid-template-columns: 1fr; } }
+  @media (min-width: 640px) and (max-width: 900px) { .features-grid { grid-template-columns: 1fr 1fr; } }
+
+  /* ── CODE SECTION ───────────────────────── */
+  #integracion {
+    background: var(--dark-bg);
+  }
+  #integracion h2,
+  #integracion .code-check { color: var(--dark-text); }
+  #integracion p { color: var(--dark-muted); }
+  #integracion .pill { background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.3); }
+  .code-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 64px; align-items: center;
+  }
+  .code-checks { display: flex; flex-direction: column; gap: 14px; margin-top: 28px; }
+  .code-check {
+    display: flex; align-items: center; gap: 12px;
+    font-size: 0.95rem; color: var(--text-muted);
+  }
+  .code-check .material-symbols-outlined { color: var(--amber); font-size: 18px; }
+  .code-block {
+    background: #0d0d14;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+  }
+  .code-tabs {
+    display: flex;
+    background: rgba(255,255,255,0.03);
+    border-bottom: 1px solid var(--border);
+  }
+  .code-tab {
+    padding: 12px 20px;
+    font-size: 0.82rem; font-weight: 500;
+    color: var(--text-muted); cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .code-tab.active { color: var(--amber); border-bottom-color: var(--amber); }
+  .code-content { padding: 24px; overflow-x: auto; }
+  .code-content pre { font-size: 0.82rem; line-height: 1.7; }
+  .kw  { color: #a78bfa; }
+  .str { color: #34d399; }
+  .fn  { color: #60a5fa; }
+  .cm  { color: #4b5563; }
+
+  @media (max-width: 900px) { .code-grid { grid-template-columns: 1fr; } }
+
+  /* ── STATS BAND ──────────────────────────── */
+  #stats {
+    padding: 60px 0;
+    background: var(--dark-bg);
+    border-top: none;
+    border-bottom: none;
+  }
+  #stats .stat-num { color: var(--amber); }
+  #stats .stat-label { color: var(--dark-muted); }
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; text-align: center; }
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem; font-weight: 900;
+    color: var(--amber); line-height: 1;
+    margin-bottom: 8px;
+  }
+  .stat-label { font-size: 0.9rem; color: var(--text-muted); }
+  @media (max-width: 700px) { .stats-grid { grid-template-columns: 1fr 1fr; } }
+
+  /* ── TESTIMONIALS ───────────────────────── */
+  .testi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .testi-card { padding: 32px; }
+  .stars { display: flex; gap: 3px; margin-bottom: 16px; }
+  .stars .material-symbols-outlined { color: var(--amber); font-size: 16px; }
+  .testi-card p { font-size: 0.95rem; color: var(--text); line-height: 1.7; margin-bottom: 24px; font-style: italic; }
+  .testi-author { display: flex; align-items: center; gap: 12px; }
+  .testi-avatar {
+    width: 40px; height: 40px;
+    background: var(--amber-glow);
+    border: 1px solid rgba(245,158,11,0.25);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.8rem; color: var(--amber);
+  }
+  .testi-name { font-weight: 600; font-size: 0.9rem; color: var(--white); }
+  .testi-role { font-size: 0.8rem; color: var(--text-muted); }
+  @media (max-width: 900px) { .testi-grid { grid-template-columns: 1fr; } }
+  @media (min-width: 640px) and (max-width: 900px) { .testi-grid { grid-template-columns: 1fr 1fr; } }
+
+  /* ── Dark sections ───────────────────────── */
+  .section-dark { background: var(--dark-bg); }
+  .section-dark h2,
+  .section-dark h3,
+  .section-dark .section-header p,
+  .section-dark .price-name,
+  .section-dark .price-num,
+  .section-dark .price-period,
+  .section-dark .price-desc,
+  .section-dark .price-features li { color: var(--dark-text); }
+  .section-dark .price-name,
+  .section-dark .price-period,
+  .section-dark .price-desc,
+  .section-dark .section-header p { color: var(--dark-muted); }
+  .section-dark .card {
+    background: var(--dark-card);
+    border-color: var(--dark-border);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+  .section-dark .card:hover {
+    box-shadow: 0 16px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(245,158,11,0.2);
+  }
+  .section-dark .card.featured {
+    background: linear-gradient(135deg, rgba(245,158,11,0.08) 0%, var(--dark-card) 60%);
+    border-color: rgba(245,158,11,0.35);
+  }
+  .section-dark .price-desc { border-bottom-color: var(--dark-border); }
+  .section-dark .btn-ghost {
+    border-color: var(--dark-border);
+    color: var(--dark-text);
+  }
+  .section-dark .btn-ghost:hover { background: rgba(255,255,255,0.05); }
+  .section-dark .pill { background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.3); }
+
+  /* ── PRICING ─────────────────────────────── */
+  .pricing-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 24px; max-width: 1000px; margin: 0 auto;
+    align-items: end;
+  }
+  .price-card { padding: 36px 32px; position: relative; }
+  .price-card.featured {
+    border-color: rgba(245,158,11,0.4);
+    background: linear-gradient(135deg, rgba(245,158,11,0.06) 0%, var(--bg-card) 60%);
+    box-shadow: 0 0 0 1px rgba(245,158,11,0.2), 0 20px 40px rgba(0,0,0,0.4);
+  }
+  .price-badge {
+    position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+    background: var(--amber); color: #0a0a0f;
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 5px 14px; border-radius: 999px;
+  }
+  .price-name { font-weight: 600; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
+  .price-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem; font-weight: 900; color: var(--white);
+    line-height: 1; margin-bottom: 4px;
+  }
+  .price-period { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px; }
+  .price-desc { font-size: 0.9rem; color: var(--text-muted); padding-bottom: 20px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+  .price-features { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
+  .price-features li { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; }
+  .price-features .material-symbols-outlined { color: var(--amber); font-size: 16px; flex-shrink: 0; }
+  @media (max-width: 900px) { .pricing-grid { grid-template-columns: 1fr; max-width: 440px; } }
+
+  /* ── FORM SECTION ───────────────────────── */
+  #contacto {
+    background: var(--bg-raised);
+    border-top: 1px solid var(--border);
+  }
+  .form-wrap { max-width: 640px; margin: 0 auto; }
+  .form-header { text-align: center; margin-bottom: 40px; }
+  .form-header p { margin-top: 12px; }
+
+  .contact-form {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    border-radius: var(--radius-lg);
+    padding: 40px;
+    display: flex; flex-direction: column; gap: 20px;
+  }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-group { display: flex; flex-direction: column; gap: 8px; }
+  .form-label {
+    font-size: 0.85rem; font-weight: 500; color: var(--text);
+    display: flex; align-items: center; gap: 4px;
+  }
+  .form-label .req { color: var(--amber); }
+  .form-input {
+    height: 48px; padding: 0 16px;
+    background: var(--bg-raised); border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.95rem;
+    outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+    width: 100%;
+  }
+  .form-input::placeholder { color: #9ca3af; }
+  .form-input:focus {
+    border-color: rgba(245,158,11,0.5);
+    box-shadow: 0 0 0 3px rgba(245,158,11,0.08);
+  }
+  select.form-input { cursor: pointer; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238888aa' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center;
+    padding-right: 36px;
+  }
+  select.form-input option { background: var(--bg-card); color: var(--text); }
+
+  .radio-group { display: flex; gap: 16px; }
+  .radio-label {
+    display: flex; align-items: center; gap: 8px; cursor: pointer;
+    font-size: 0.95rem; color: var(--text-muted);
+    padding: 10px 16px;
+    background: var(--bg-raised); border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    transition: border-color 0.2s, color 0.2s;
+    flex: 1; justify-content: center;
+  }
+  .radio-label input[type="radio"] { accent-color: var(--amber); }
+  .radio-label:has(input:checked) {
+    border-color: rgba(245,158,11,0.5);
+    color: var(--amber);
+    background: var(--amber-glow);
+  }
+
+  .form-error-box {
+    display: none;
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-size: 0.9rem; color: #fca5a5;
+  }
+  .form-success {
+    display: none;
+    text-align: center; padding: 48px 32px;
+  }
+  .form-success .check-icon {
+    font-size: 56px; color: var(--success);
+    display: block; margin-bottom: 16px;
+    animation: pulse-glow 2s infinite;
+  }
+  .form-success h3 { color: var(--white); margin-bottom: 8px; }
+
+  .btn-submit {
+    height: 52px;
+    background: var(--amber); color: #0a0a0f;
+    font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 1rem;
+    border: none; border-radius: var(--radius-sm);
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 4px 20px rgba(245,158,11,0.2);
+  }
+  .btn-submit:hover { background: #fbbf24; transform: translateY(-1px); box-shadow: 0 8px 30px rgba(245,158,11,0.35); }
+  .btn-submit:active { transform: translateY(0); }
+  .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  .form-trust {
+    display: flex; justify-content: center; gap: 24px; flex-wrap: wrap;
+    font-size: 0.82rem; color: var(--text-muted);
+  }
+  .form-trust-item { display: flex; align-items: center; gap: 6px; }
+  .form-trust-item .material-symbols-outlined { font-size: 16px; color: var(--amber); }
+
+  @media (max-width: 600px) {
+    .contact-form { padding: 24px; }
+    .form-row { grid-template-columns: 1fr; }
+    .radio-group { flex-direction: column; }
+  }
+
+  /* ── FOOTER ─────────────────────────────── */
+  footer {
+    background: var(--dark-bg);
+    border-top: none;
+    padding: 64px 0 32px;
+  }
+  .footer-brand p,
+  .footer-col h4,
+  .footer-col a,
+  .footer-bottom { color: var(--dark-muted); }
+  .footer-col h4 { color: var(--dark-text); }
+  .footer-col a:hover { color: var(--dark-text); }
+  .footer-bottom { border-top-color: var(--dark-border); }
+  .footer-logo { color: var(--dark-text); }
+  .footer-grid {
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 48px; margin-bottom: 48px;
+  }
+  .footer-brand p { font-size: 0.9rem; color: var(--text-muted); margin-top: 12px; max-width: 260px; }
+  .footer-col h4 { font-size: 0.85rem; font-weight: 600; color: var(--text); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 16px; }
+  .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .footer-col a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+  .footer-col a:hover { color: var(--white); }
+  .footer-bottom {
+    border-top: 1px solid var(--border); padding-top: 24px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 0.85rem; color: var(--text-muted);
+  }
+  .footer-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem; font-weight: 800; color: var(--white);
+  }
+  .footer-logo .dot { color: var(--amber); }
+  @media (max-width: 768px) {
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+    .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
+  }
+  @media (max-width: 480px) { .footer-grid { grid-template-columns: 1fr; } }
 </style>
 </head>
-<body class="bg-background text-on-background font-body text-body antialiased selection:bg-primary-container selection:text-on-primary-container">
-<!-- TopNavBar -->
-<header class="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-md dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 shadow-sm font-['Inter'] antialiased">
-<div class="flex justify-between items-center h-16 px-6 lg:px-12 max-w-[1280px] mx-auto">
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-primary-container" style="font-variation-settings: 'FILL' 1;">analytics</span>
-<span class="text-2xl font-extrabold tracking-tighter text-blue-600 dark:text-blue-500">Zentria</span>
-</div>
-<nav class="hidden md:flex items-center gap-8">
-<a class="text-slate-600 dark:text-slate-400 font-medium hover:text-blue-700 dark:hover:text-blue-300 transition-colors duration-200 active:scale-95 transition-transform" href="#features">Features</a>
-<a class="text-slate-600 dark:text-slate-400 font-medium hover:text-blue-700 dark:hover:text-blue-300 transition-colors duration-200 active:scale-95 transition-transform" href="#pricing">Pricing</a>
-<a class="text-slate-600 dark:text-slate-400 font-medium hover:text-blue-700 dark:hover:text-blue-300 transition-colors duration-200 active:scale-95 transition-transform" href="#">Docs</a>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="container">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">Zentria<span class="dot">.</span></a>
+      <div class="nav-links">
+        <a href="#features">Funcionalidades</a>
+        <a href="#precios">Precios</a>
+        <a href="#contacto">Contacto</a>
+      </div>
+      <a href="#contacto" class="btn-primary nav-cta" style="padding:10px 22px;font-size:0.88rem;">Solicitar información</a>
+      <button id="menu-btn" aria-label="Menú">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+    </div>
+  </div>
+  <div id="mobile-menu">
+    <a href="#features">Funcionalidades</a>
+    <a href="#precios">Precios</a>
+    <a href="#contacto">Contacto</a>
+    <a href="#contacto" class="btn-primary" style="text-align:center;margin-top:4px;">Solicitar información</a>
+  </div>
 </nav>
-<button class="bg-primary-container text-on-primary-container font-label text-label px-4 py-2 rounded-lg hover:opacity-90 transition-opacity active:scale-95 shadow-sm hidden md:block">
-                Get Started
-            </button>
-<button id="menu-toggle" class="md:hidden text-on-surface p-2" aria-label="Toggle menu" aria-expanded="false">
-<span class="material-symbols-outlined">menu</span>
-</button>
-</div>
-<!-- Mobile Menu -->
-<div id="mobile-menu" class="hidden md:hidden absolute top-16 left-0 w-full bg-white/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-sm p-6 flex-col gap-4">
-  <a class="text-slate-600 dark:text-slate-400 font-medium hover:text-blue-700 dark:hover:text-blue-300 transition-colors" href="#features">Features</a>
-  <a class="text-slate-600 dark:text-slate-400 font-medium hover:text-blue-700 dark:hover:text-blue-300 transition-colors" href="#pricing">Pricing</a>
-  <a class="text-slate-600 dark:text-slate-400 font-medium hover:text-blue-700 dark:hover:text-blue-300 transition-colors" href="#">Docs</a>
-  <button class="bg-primary-container text-on-primary-container font-label text-label px-4 py-2 rounded-lg hover:opacity-90 transition-opacity active:scale-95 shadow-sm w-full mt-2">
-    Get Started
-  </button>
-</div>
-</header>
-<main>
-<!-- Hero Section -->
-<section class="pt-24 pb-16 px-6 lg:px-12 max-w-[1280px] mx-auto overflow-hidden">
-<div class="grid lg:grid-cols-2 gap-12 items-center">
-<div class="flex flex-col gap-6 relative z-10">
-<h1 class="font-h1 text-4xl md:text-h1 text-on-surface">
-                        Track every conversion with precision
-                    </h1>
-<p class="font-body text-body text-on-surface-variant text-lg">
-                        The SDK that captures every visitor action. Built for developers, trusted by marketing teams. Deploy in minutes, track with zero data loss.
-                    </p>
-<div class="flex flex-col sm:flex-row gap-4 mt-2">
-<button class="bg-primary-container text-on-primary-container font-label text-label px-6 py-3 rounded-lg hover:opacity-90 transition-opacity active:scale-95 shadow-sm text-center">
-                            Start Free Trial
-                        </button>
-<button class="bg-transparent text-on-surface border border-outline font-label text-label px-6 py-3 rounded-lg hover:bg-surface-container transition-colors active:scale-95 text-center flex items-center justify-center gap-2">
-<span class="material-symbols-outlined">play_circle</span>
-                            Watch Demo
-                        </button>
-</div>
-<div class="flex items-center gap-4 mt-4 text-sm text-on-surface-variant">
-<div class="flex items-center gap-1">
-<span class="material-symbols-outlined text-[16px] text-surface-tint">check_circle</span>
-<span>No credit card required</span>
-</div>
-<span class="w-1 h-1 rounded-full bg-outline"></span>
-<div class="flex items-center gap-1">
-<span class="material-symbols-outlined text-[16px] text-surface-tint">timer</span>
-<span>5 min setup</span>
-</div>
-</div>
-</div>
-<div class="relative w-full aspect-[4/3] rounded-xl overflow-hidden border border-outline-variant shadow-[0_10px_30px_-10px_rgba(0,0,0,0.1)] bg-surface-container-lowest lg:translate-x-12">
-<img alt="Dashboard mockup showing charts and data tables" class="w-full h-full object-cover" data-alt="Modern SaaS dashboard interface with dark mode theme, displaying detailed analytics charts, graphs, and clean typography on a screen" src="https://lh3.googleusercontent.com/aida-public/AB6AXuChywCW1ZOxHo_1Fc6BoCQTAkxcbM91LDmqYr_vJmJPw55Nw3I3IQ2dw9471R81PuQHLixuxZeUf8RqtH51_xUPq6DKjueZAMZopBpfTeKo4RH1GB7q2576zsSrPa7dCRTOGEBzW6kUbsn6RTSqiZK5NyIw5bTN3DhKXXfkDhDT-qFw6AggB5FU3WCoVcdxxSotWZFulNp2s7sQ6XPWbKtkkjBIwKrhqwPoaKTcnLQ-77GIb4afBbmlY5CTxV6kKNwc_hc4_QeEeQ8"/>
-<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/50 to-transparent"></div>
-</div>
-</div>
-</section>
-<!-- Logo Bar -->
-<section class="py-12 border-y border-surface-container-high bg-surface-container-lowest">
-<div class="max-w-[1280px] mx-auto px-6 text-center">
-<p class="font-label text-label text-outline mb-6 uppercase tracking-wider">Trusted by leading companies</p>
-<div class="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-60 grayscale">
-<!-- Placeholder logos -->
-<div class="text-xl font-bold font-h2 text-on-surface">ACME Corp</div>
-<div class="text-xl font-bold font-h2 text-on-surface">Globex</div>
-<div class="text-xl font-bold font-h2 text-on-surface">Soylent</div>
-<div class="text-xl font-bold font-h2 text-on-surface">Initech</div>
-<div class="text-xl font-bold font-h2 text-on-surface">Umbrella</div>
-<div class="text-xl font-bold font-h2 text-on-surface">Stark Ind.</div>
-</div>
-</div>
-</section>
-<!-- Features -->
-<section id="features" class="py-24 px-6 lg:px-12 max-w-[1280px] mx-auto">
-<div class="text-center mb-16 max-w-2xl mx-auto">
-<h2 class="font-h2 text-3xl md:text-h2 text-on-surface mb-4">Built for scale, designed for simplicity</h2>
-<p class="font-body text-body text-on-surface-variant">Everything you need to track user behavior reliably without slowing down your application.</p>
-</div>
-<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-<div class="bg-surface-container-lowest border border-outline-variant p-8 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.1)] hover:shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1)] transition-shadow">
-<div class="w-12 h-12 bg-primary-fixed rounded-lg flex items-center justify-center mb-6">
-<span class="material-symbols-outlined text-primary-container" style="font-variation-settings: 'FILL' 1;">bolt</span>
-</div>
-<h3 class="font-h3 text-h3 text-on-surface mb-3">Real-time Events</h3>
-<p class="font-body text-body text-on-surface-variant">Stream events to your data warehouse in milliseconds. Zero latency, 100% accuracy.</p>
-</div>
-<div class="bg-surface-container-lowest border border-outline-variant p-8 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.1)] hover:shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1)] transition-shadow">
-<div class="w-12 h-12 bg-primary-fixed rounded-lg flex items-center justify-center mb-6">
-<span class="material-symbols-outlined text-primary-container" style="font-variation-settings: 'FILL' 1;">fingerprint</span>
-</div>
-<h3 class="font-h3 text-h3 text-on-surface mb-3">Identity Resolution</h3>
-<p class="font-body text-body text-on-surface-variant">Stitch anonymous sessions with authenticated users seamlessly across all devices.</p>
-</div>
-<div class="bg-surface-container-lowest border border-outline-variant p-8 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.1)] hover:shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1)] transition-shadow">
-<div class="w-12 h-12 bg-primary-fixed rounded-lg flex items-center justify-center mb-6">
-<span class="material-symbols-outlined text-primary-container" style="font-variation-settings: 'FILL' 1;">code</span>
-</div>
-<h3 class="font-h3 text-h3 text-on-surface mb-3">Easy Integration</h3>
-<p class="font-body text-body text-on-surface-variant">Drop-in snippets for React, Vue, Vanilla JS, and all major backend frameworks.</p>
-</div>
-</div>
-</section>
-<!-- Code Preview Section -->
-<section class="py-24 bg-surface-container px-6 lg:px-12">
-<div class="max-w-[1024px] mx-auto">
-<div class="flex flex-col md:flex-row gap-12 items-center">
-<div class="flex-1">
-<h2 class="font-h2 text-3xl md:text-h2 text-on-surface mb-4">Embed in seconds</h2>
-<p class="font-body text-body text-on-surface-variant mb-6">Start tracking immediately with our lightweight npm package. Less than 5kb gzipped.</p>
-<div class="flex flex-col gap-2">
-<div class="flex items-center gap-3">
-<span class="material-symbols-outlined text-surface-tint">check_circle</span>
-<span class="font-body text-body">Type-safe configuration</span>
-</div>
-<div class="flex items-center gap-3">
-<span class="material-symbols-outlined text-surface-tint">check_circle</span>
-<span class="font-body text-body">Auto-retry logic built-in</span>
-</div>
-<div class="flex items-center gap-3">
-<span class="material-symbols-outlined text-surface-tint">check_circle</span>
-<span class="font-body text-body">GDPR compliance ready</span>
-</div>
-</div>
-</div>
-<div class="flex-1 w-full max-w-[500px]">
-<div class="bg-[#1E293B] rounded-xl overflow-hidden shadow-[0_20px_25px_-5px_rgba(0,0,0,0.2)]">
-<div class="flex bg-slate-900 px-4 pt-3 border-b border-slate-700/50 overflow-x-auto">
-<div class="px-4 py-2 border-b-2 border-primary-container text-white font-label text-label cursor-pointer whitespace-nowrap">npm</div>
-<div class="px-4 py-2 text-slate-400 hover:text-slate-200 font-label text-label cursor-pointer transition-colors whitespace-nowrap">CDN</div>
-<div class="px-4 py-2 text-slate-400 hover:text-slate-200 font-label text-label cursor-pointer transition-colors whitespace-nowrap">WordPress</div>
-</div>
-<div class="p-4 overflow-x-auto">
-<pre class="font-code text-code text-slate-300"><code><span class="text-slate-500">// Install the package</span>
-<span class="text-[#10B981]">npm</span> install @zentria/sdk
 
-<span class="text-slate-500">// Initialize in your app</span>
-<span class="text-primary-container">import</span> { Zentria } <span class="text-primary-container">from</span> '@zentria/sdk';
+<!-- HERO -->
+<section id="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div>
+        <div class="hero-eyebrow anim-up">
+          <span class="pill">
+            <span class="material-symbols-outlined" style="font-size:13px;font-variation-settings:'FILL' 1;">bolt</span>
+            Seguimiento en tiempo real
+          </span>
+        </div>
+        <h1 class="hero-title anim-up delay-1">
+          Convierte cada visita en una <em>oportunidad real</em>
+        </h1>
+        <p class="hero-desc anim-up delay-2">
+          El SDK que captura cada acción del usuario, identifica leads con precisión y los entrega directamente a tu CRM. Sin pérdida de datos. Sin fricción.
+        </p>
+        <div class="hero-actions anim-up delay-3">
+          <a href="#contacto" class="btn-primary">Solicitar información</a>
+          <a href="#features" class="btn-ghost">
+            <span class="material-symbols-outlined" style="font-size:18px;">play_circle</span>
+            Ver funcionalidades
+          </a>
+        </div>
+        <div class="hero-trust anim-up delay-4">
+          <div class="hero-trust-item">
+            <span class="material-symbols-outlined">verified</span>
+            Sin tarjeta de crédito
+          </div>
+          <div style="width:4px;height:4px;background:rgba(255,255,255,0.2);border-radius:50%;"></div>
+          <div class="hero-trust-item">
+            <span class="material-symbols-outlined">timer</span>
+            Integración en 5 minutos
+          </div>
+          <div style="width:4px;height:4px;background:rgba(255,255,255,0.2);border-radius:50%;"></div>
+          <div class="hero-trust-item">
+            <span class="material-symbols-outlined">shield</span>
+            Cumple RGPD
+          </div>
+        </div>
+      </div>
 
-<span class="text-primary-container">const</span> tracker = <span class="text-primary-container">new</span> Zentria({
-  apiKey: <span class="text-[#10B981]">'zt_live_123abc'</span>,
-  autoTrack: <span class="text-[#10B981]">true</span>
+      <!-- Dashboard mockup -->
+      <div class="hero-visual anim-in delay-3">
+        <div class="mockup-bar">
+          <div class="mockup-dot"></div>
+          <div class="mockup-dot"></div>
+          <div class="mockup-dot"></div>
+          <span style="font-size:0.72rem;color:var(--text-muted);margin-left:auto;font-family:'DM Mono',monospace;">zentria / dashboard</span>
+        </div>
+        <div class="mockup-stats">
+          <div class="mockup-stat">
+            <div class="mockup-stat-label">Conversiones</div>
+            <div class="mockup-stat-value">2,847</div>
+            <div class="mockup-stat-delta">↑ +12.4%</div>
+          </div>
+          <div class="mockup-stat">
+            <div class="mockup-stat-label">Leads hoy</div>
+            <div class="mockup-stat-value">143</div>
+            <div class="mockup-stat-delta">↑ +8.1%</div>
+          </div>
+          <div class="mockup-stat">
+            <div class="mockup-stat-label">Tasa conv.</div>
+            <div class="mockup-stat-value">3.7%</div>
+            <div class="mockup-stat-delta">↑ +0.3%</div>
+          </div>
+        </div>
+        <div class="mockup-chart">
+          <div class="chart-bar" style="height:40%"></div>
+          <div class="chart-bar" style="height:55%"></div>
+          <div class="chart-bar" style="height:35%"></div>
+          <div class="chart-bar hi" style="height:75%"></div>
+          <div class="chart-bar" style="height:60%"></div>
+          <div class="chart-bar hi" style="height:90%"></div>
+          <div class="chart-bar" style="height:70%"></div>
+          <div class="chart-bar" style="height:50%"></div>
+          <div class="chart-bar hi" style="height:85%"></div>
+          <div class="chart-bar" style="height:65%"></div>
+          <div class="chart-bar" style="height:45%"></div>
+          <div class="chart-bar hi" style="height:95%"></div>
+        </div>
+        <div class="mockup-events">
+          <div class="event-row">
+            <div class="event-dot green"></div>
+            <span class="event-name">form_submit → Odoo CRM</span>
+            <span class="event-time">hace 2s</span>
+          </div>
+          <div class="event-row">
+            <div class="event-dot amber"></div>
+            <span class="event-name">identity_linked</span>
+            <span class="event-time">hace 5s</span>
+          </div>
+          <div class="event-row">
+            <div class="event-dot purple"></div>
+            <span class="event-name">scroll_depth 75%</span>
+            <span class="event-time">hace 8s</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LOGO BAR -->
+<section id="logos">
+  <div class="container">
+    <p class="logos-label">Utilizado por equipos que priorizan los datos</p>
+    <div class="logos-row">
+      <span>Accenture</span>
+      <span>Salesforce</span>
+      <span>HubSpot</span>
+      <span>Mailchimp</span>
+      <span>Segment</span>
+      <span>Mixpanel</span>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section id="stats">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="anim-up">
+        <div class="stat-num">99.9%</div>
+        <div class="stat-label">Disponibilidad garantizada</div>
+      </div>
+      <div class="anim-up delay-1">
+        <div class="stat-num">&lt;50ms</div>
+        <div class="stat-label">Latencia por evento</div>
+      </div>
+      <div class="anim-up delay-2">
+        <div class="stat-num">+30%</div>
+        <div class="stat-label">Mejora media en conversión</div>
+      </div>
+      <div class="anim-up delay-3">
+        <div class="stat-num">5min</div>
+        <div class="stat-label">Tiempo de integración</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" class="section">
+  <div class="container">
+    <div class="section-header">
+      <span class="pill" style="margin-bottom:16px;display:inline-flex;">Funcionalidades</span>
+      <h2>Diseñado para escalar, pensado para simplificar</h2>
+      <p>Todo lo que necesitas para rastrear el comportamiento del usuario de forma fiable sin ralentizar tu aplicación.</p>
+    </div>
+    <div class="features-grid">
+      <div class="card feature-card anim-up">
+        <div class="feature-icon">
+          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">bolt</span>
+        </div>
+        <h3>Eventos en tiempo real</h3>
+        <p>Envía eventos a tu almacén de datos en milisegundos. Cero latencia, 100% de precisión sin perder ni un clic.</p>
+      </div>
+      <div class="card feature-card anim-up delay-1">
+        <div class="feature-icon">
+          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">fingerprint</span>
+        </div>
+        <h3>Resolución de identidad</h3>
+        <p>Conecta sesiones anónimas con usuarios autenticados de forma transparente en todos los dispositivos.</p>
+      </div>
+      <div class="card feature-card anim-up delay-2">
+        <div class="feature-icon">
+          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">code</span>
+        </div>
+        <h3>Integración sencilla</h3>
+        <p>Fragmentos de código para React, Vue, Vanilla JS y todos los frameworks principales. Listo en minutos.</p>
+      </div>
+      <div class="card feature-card anim-up delay-1">
+        <div class="feature-icon">
+          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">security</span>
+        </div>
+        <h3>Detección de bots</h3>
+        <p>Puntuación de riesgo automática para filtrar leads fraudulentos antes de que entren en tu CRM.</p>
+      </div>
+      <div class="card feature-card anim-up delay-2">
+        <div class="feature-icon">
+          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">hub</span>
+        </div>
+        <h3>Integración con CRM</h3>
+        <p>Sincronización directa con Odoo, Salesforce y HubSpot vía n8n. Sin código adicional, sin intermediarios.</p>
+      </div>
+      <div class="card feature-card anim-up delay-3">
+        <div class="feature-icon">
+          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">bar_chart</span>
+        </div>
+        <h3>UTM y atribución</h3>
+        <p>Captura automática de parámetros UTM y atribución multitoque para saber exactamente qué campañas convierten.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CODE SECTION -->
+<section id="integracion" class="section">
+  <div class="container">
+    <div class="code-grid">
+      <div>
+        <span class="pill" style="margin-bottom:20px;display:inline-flex;">Integración</span>
+        <h2>Integra en segundos</h2>
+        <p style="margin-top:16px;">Empieza a rastrear inmediatamente con nuestro paquete npm ultraligero. Menos de 5kb comprimido.</p>
+        <div class="code-checks">
+          <div class="code-check">
+            <span class="material-symbols-outlined">check_circle</span>
+            Configuración con tipos seguros
+          </div>
+          <div class="code-check">
+            <span class="material-symbols-outlined">check_circle</span>
+            Lógica de reintento automático
+          </div>
+          <div class="code-check">
+            <span class="material-symbols-outlined">check_circle</span>
+            Listo para cumplir con el RGPD
+          </div>
+          <div class="code-check">
+            <span class="material-symbols-outlined">check_circle</span>
+            Sin dependencias externas
+          </div>
+        </div>
+      </div>
+      <div class="code-block">
+        <div class="code-tabs">
+          <div class="code-tab active">npm</div>
+          <div class="code-tab">CDN</div>
+          <div class="code-tab">WordPress</div>
+        </div>
+        <div class="code-content">
+<pre><span class="cm">// Instala el paquete</span>
+<span class="str">npm</span> install @zentria/sdk
+
+<span class="cm">// Inicializa en tu app</span>
+<span class="kw">import</span> { Zentria } <span class="kw">from</span> <span class="str">'@zentria/sdk'</span>;
+
+<span class="kw">const</span> tracker = <span class="kw">new</span> <span class="fn">Zentria</span>({
+  apiKey: <span class="str">'zt_live_123abc'</span>,
+  autoTrack: <span class="str">true</span>
 });
 
-tracker.identify(<span class="text-[#10B981]">'user_456'</span>, {
-  plan: <span class="text-[#10B981]">'pro'</span>
-});</code></pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-    </section>
-    <!-- Testimonials Section -->
-    <section id="testimonials" class="py-24 px-6 lg:px-12 max-w-[1280px] mx-auto">
-        <div class="text-center mb-16 max-w-2xl mx-auto">
-            <h2 class="font-h2 text-3xl md:text-h2 text-on-surface mb-4">Loved by developers</h2>
-            <p class="font-body text-body text-on-surface-variant">See what teams are saying about Zentria.</p>
+tracker.<span class="fn">identify</span>(<span class="str">'usuario_456'</span>, {
+  plan: <span class="str">'pro'</span>
+});</pre>
         </div>
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <!-- Testimonial 1 -->
-            <div class="bg-surface-container-lowest border border-outline-variant p-8 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.1)]">
-                <div class="flex items-center gap-1 mb-4">
-                    <span class="material-symbols-outlined text-tertiary text-[20px]">star</span>
-                    <span class="material-symbols-outlined text-tertiary text-[20px]">star</span>
-                    <span class="material-symbols-outlined text-tertiary text-[20px]">star</span>
-                    <span class="material-symbols-outlined text-tertiary text-[20px]">star</span>
-                    <span class="material-symbols-outlined text-tertiary text-[20px]">star</span>
-                </div>
-                <p class="font-body text-body text-on-surface mb-6">"Setup took 5 minutes. We went from zero visibility on our funnel to full attribution in under an hour. The developer experience is unmatched."</p>
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-primary-container font-bold">SC</div>
-                    <div>
-                        <p class="font-label text-label text-on-surface font-semibold">Sarah Chen</p>
-                        <p class="font-body text-body text-on-surface-variant text-sm">TechStart</p>
-                    </div>
-                </div>
-            </div>
-            <!-- Testimonial 2 -->
-            <div class="bg-surface-container-lowest border border-outline-variant p-8 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.1)]">
-                <div class="flex items-center gap-1 mb-4">
-                    <span class="material-symbols-outlined text-tertiary text-[20px]">star</span>
-                    <span class="material-symbols-outlined text-tertiary text-[20px]">star</span>
-                    <span class="material-symbols-outlined text-tertiary text-[20px]">star</span>
-                    <span class="material-symbols-outlined text-tertiary text-[20px]">star</span>
-                    <span class="material-symbols-outlined text-tertiary text-[20px]">star</span>
-                </div>
-                <p class="font-body text-body text-on-surface mb-6">"Identity resolution is game-changing. We can finally see the full customer journey from first touch to purchase. Our CAC dropped 30%."</p>
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-primary-container font-bold">MR</div>
-                    <div>
-                        <p class="font-label text-label text-on-surface font-semibold">Marcus Rodriguez</p>
-                        <p class="font-body text-body text-on-surface-variant text-sm">GrowthHub</p>
-                    </div>
-                </div>
-            </div>
-            <!-- Testimonial 3 -->
-            <div class="bg-surface-container-lowest border border-outline-variant p-8 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.1)]">
-                <div class="flex items-center gap-1 mb-4">
-                    <span class="material-symbols-outlined text-tertiary text-[20px]">star</span>
-                    <span class="material-symbols-outlined text-tertiary text-[20px]">star</span>
-                    <span class="material-symbols-outlined text-tertiary text-[20px]">star</span>
-                    <span class="material-symbols-outlined text-tertiary text-[20px]">star</span>
-                    <span class="material-symbols-outlined text-tertiary text-[20px]">star</span>
-                </div>
-                <p class="font-body text-body text-on-surface mb-6">"Finally, tracking that just works. No more pixel fires missing, no more attribution black holes. Zentria just handles it."</p>
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-primary-container font-bold">EW</div>
-                    <div>
-                        <p class="font-label text-label text-on-surface font-semibold">Emma Wilson</p>
-                        <p class="font-body text-body text-on-surface-variant text-sm">ScaleAI</p>
-                    </div>
-                </div>
-            </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonios" class="section">
+  <div class="container">
+    <div class="section-header">
+      <span class="pill" style="margin-bottom:16px;display:inline-flex;">Testimonios</span>
+      <h2>Lo que dicen los equipos</h2>
+      <p>Empresas reales usando Zentria para mejorar sus conversiones cada día.</p>
+    </div>
+    <div class="testi-grid">
+      <div class="card testi-card anim-up">
+        <div class="stars">
+          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
+          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
+          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
+          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
+          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
         </div>
-    </section>
-    <!-- Pricing Section -->
-    <section id="pricing" class="py-24 px-6 lg:px-12 max-w-[1280px] mx-auto">
-        <div class="text-center mb-16">
-            <h2 class="font-h2 text-3xl md:text-h2 text-on-surface mb-4">Simple, transparent pricing</h2>
-            <p class="font-body text-body text-on-surface-variant">Scale without worrying about surprise bills.</p>
+        <p>"La integración tardó 5 minutos. Pasamos de no tener visibilidad en el funnel a tener atribución completa en menos de una hora. La experiencia de desarrollo es inmejorable."</p>
+        <div class="testi-author">
+          <div class="testi-avatar">SC</div>
+          <div>
+            <div class="testi-name">Sara Chávez</div>
+            <div class="testi-role">CTO · TechStart Madrid</div>
+          </div>
         </div>
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-[1024px] mx-auto items-end">
-            <!-- Starter -->
-            <div class="bg-surface-container-lowest border border-outline-variant p-8 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.1)] h-fit">
-                <h3 class="font-h3 text-h3 text-on-surface mb-2">Starter</h3>
-                <div class="mb-6">
-                    <span class="text-4xl font-bold font-h2">$29</span>
-                    <span class="text-on-surface-variant font-body">/mo</span>
-                </div>
-                <p class="font-body text-body text-on-surface-variant mb-6 pb-6 border-b border-surface-container-high">Perfect for side projects and small teams.</p>
-                <ul class="space-y-4 mb-8">
-                    <li class="flex items-center gap-3">
-                        <span class="material-symbols-outlined text-surface-tint text-[20px]">check</span>
-                        <span class="font-body text-body">10,000 events/mo</span>
-                    </li>
-                    <li class="flex items-center gap-3">
-                        <span class="material-symbols-outlined text-surface-tint text-[20px]">check</span>
-                        <span class="font-body text-body">1 site</span>
-                    </li>
-                    <li class="flex items-center gap-3">
-                        <span class="material-symbols-outlined text-surface-tint text-[20px]">check</span>
-                        <span class="font-body text-body">Basic analytics</span>
-                    </li>
-                </ul>
-                <button class="w-full bg-transparent text-on-surface border border-outline font-label text-label px-4 py-3 rounded-lg hover:bg-surface-container transition-colors active:scale-95 text-center">
-                                Start Starter
-                            </button>
-            </div>
-            <!-- Pro -->
-            <div class="bg-surface-container-lowest border-2 border-primary-container p-8 rounded-xl shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1)] relative">
-                <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary-container text-on-primary-container px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Most Popular</div>
-                <h3 class="font-h3 text-h3 text-on-surface mb-2">Pro</h3>
-                <div class="mb-6">
-                    <span class="text-4xl font-bold font-h2">$99</span>
-                    <span class="text-on-surface-variant font-body">/mo</span>
-                </div>
-                <p class="font-body text-body text-on-surface-variant mb-6 pb-6 border-b border-surface-container-high">For scaling businesses that need advanced features.</p>
-                <ul class="space-y-4 mb-8">
-                    <li class="flex items-center gap-3">
-                        <span class="material-symbols-outlined text-surface-tint text-[20px]">check</span>
-                        <span class="font-body text-body">100,000 events/mo</span>
-                    </li>
-                    <li class="flex items-center gap-3">
-                        <span class="material-symbols-outlined text-surface-tint text-[20px]">check</span>
-                        <span class="font-body text-body">Unlimited sites</span>
-                    </li>
-                    <li class="flex items-center gap-3">
-                        <span class="material-symbols-outlined text-surface-tint text-[20px]">check</span>
-                        <span class="font-body text-body">Advanced analytics</span>
-                    </li>
-                    <li class="flex items-center gap-3">
-                        <span class="material-symbols-outlined text-surface-tint text-[20px]">check</span>
-                        <span class="font-body text-body">Priority support</span>
-                    </li>
-                </ul>
-                <button class="w-full bg-primary-container text-on-primary-container font-label text-label px-4 py-3 rounded-lg hover:opacity-90 transition-opacity active:scale-95 text-center shadow-sm">
-                                Start Pro Trial
-                            </button>
-            </div>
-            <!-- Enterprise -->
-            <div class="bg-surface-container-lowest border border-outline-variant p-8 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.1)] h-fit">
-                <h3 class="font-h3 text-h3 text-on-surface mb-2">Enterprise</h3>
-                <div class="mb-6">
-                    <span class="text-4xl font-bold font-h2">Custom</span>
-                </div>
-                <p class="font-body text-body text-on-surface-variant mb-6 pb-6 border-b border-surface-container-high">For large organizations with custom security needs.</p>
-                <ul class="space-y-4 mb-8">
-                    <li class="flex items-center gap-3">
-                        <span class="material-symbols-outlined text-surface-tint text-[20px]">check</span>
-                        <span class="font-body text-body">Unlimited events</span>
-                    </li>
-                    <li class="flex items-center gap-3">
-                        <span class="material-symbols-outlined text-surface-tint text-[20px]">check</span>
-                        <span class="font-body text-body">Custom integrations</span>
-                    </li>
-                    <li class="flex items-center gap-3">
-                        <span class="material-symbols-outlined text-surface-tint text-[20px]">check</span>
-                        <span class="font-body text-body">Dedicated support</span>
-                    </li>
-                </ul>
-                <button class="w-full bg-transparent text-on-surface border border-outline font-label text-label px-4 py-3 rounded-lg hover:bg-surface-container transition-colors active:scale-95 text-center">
-                                Contact Sales
-                            </button>
-            </div>
+      </div>
+      <div class="card testi-card anim-up delay-1">
+        <div class="stars">
+          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
+          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
+          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
+          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
+          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
         </div>
-    </section>
-    <!-- Final CTA / Contact Form -->
-    <section id="contact" class="py-24 bg-gradient-to-br from-surface-container-high to-surface-container-highest px-6">
-        <div class="max-w-[680px] mx-auto">
-            <div class="text-center mb-10">
-                <h2 class="font-h2 text-3xl md:text-h2 text-on-surface mb-4">Solicita información</h2>
-                <p class="font-body text-body text-on-surface-variant">Rellena el formulario y nos ponemos en contacto contigo en menos de 24 horas.</p>
-            </div>
-
-            <!-- Success state -->
-            <div id="form-success" class="hidden bg-white border border-outline-variant rounded-xl p-10 text-center shadow-[0_1px_3px_rgba(0,0,0,0.1)]">
-                <span class="material-symbols-outlined text-surface-tint text-[48px] mb-4 block" style="font-variation-settings: 'FILL' 1;">check_circle</span>
-                <h3 class="font-h3 text-h3 text-on-surface mb-2">¡Solicitud recibida!</h3>
-                <p class="font-body text-body text-on-surface-variant">Nos pondremos en contacto contigo en breve.</p>
-            </div>
-
-            <!-- Error box -->
-            <div id="form-error" class="hidden mb-4 bg-error-container border border-error rounded-lg px-4 py-3 text-on-error-container font-body text-body text-sm"></div>
-
-            <!-- Form -->
-            <form id="contact-form" class="bg-white border border-outline-variant rounded-xl p-8 shadow-[0_1px_3px_rgba(0,0,0,0.1)] flex flex-col gap-5" novalidate>
-
-                <!-- Nombre y Email -->
-                <div class="grid sm:grid-cols-2 gap-5">
-                    <div class="flex flex-col gap-1.5">
-                        <label class="font-label text-label text-on-surface" for="cf-name">Nombre completo <span class="text-error">*</span></label>
-                        <input id="cf-name" name="name" type="text" required placeholder="Juan García"
-                            class="h-12 px-4 rounded-lg border border-outline focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 font-body text-body text-on-surface bg-white outline-none transition"/>
-                    </div>
-                    <div class="flex flex-col gap-1.5">
-                        <label class="font-label text-label text-on-surface" for="cf-email">Email <span class="text-error">*</span></label>
-                        <input id="cf-email" name="email" type="email" required placeholder="juan@email.com"
-                            class="h-12 px-4 rounded-lg border border-outline focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 font-body text-body text-on-surface bg-white outline-none transition"/>
-                    </div>
-                </div>
-
-                <!-- Teléfono y DNI -->
-                <div class="grid sm:grid-cols-2 gap-5">
-                    <div class="flex flex-col gap-1.5">
-                        <label class="font-label text-label text-on-surface" for="cf-phone">Teléfono <span class="text-error">*</span></label>
-                        <input id="cf-phone" name="phone" type="tel" required placeholder="+34 600 000 000"
-                            class="h-12 px-4 rounded-lg border border-outline focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 font-body text-body text-on-surface bg-white outline-none transition"/>
-                    </div>
-                    <div class="flex flex-col gap-1.5">
-                        <label class="font-label text-label text-on-surface" for="cf-dni">DNI / NIE <span class="text-error">*</span></label>
-                        <input id="cf-dni" name="dni" type="text" required placeholder="12345678A o X1234567A"
-                            class="h-12 px-4 rounded-lg border border-outline focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 font-body text-body text-on-surface bg-white outline-none transition"/>
-                    </div>
-                </div>
-
-                <!-- Mayor de edad y tiene DNI/NIE -->
-                <div class="grid sm:grid-cols-2 gap-5">
-                    <div class="flex flex-col gap-1.5">
-                        <label class="font-label text-label text-on-surface">¿Eres mayor de 18 años? <span class="text-error">*</span></label>
-                        <div class="flex gap-4 mt-1">
-                            <label class="flex items-center gap-2 cursor-pointer font-body text-body text-on-surface">
-                                <input type="radio" name="adult" value="si" required class="accent-primary-container w-4 h-4"/> Sí
-                            </label>
-                            <label class="flex items-center gap-2 cursor-pointer font-body text-body text-on-surface">
-                                <input type="radio" name="adult" value="no" class="accent-primary-container w-4 h-4"/> No
-                            </label>
-                        </div>
-                    </div>
-                    <div class="flex flex-col gap-1.5">
-                        <label class="font-label text-label text-on-surface">¿Posees DNI o NIE español? <span class="text-error">*</span></label>
-                        <div class="flex gap-4 mt-1">
-                            <label class="flex items-center gap-2 cursor-pointer font-body text-body text-on-surface">
-                                <input type="radio" name="has_dni" value="si" required class="accent-primary-container w-4 h-4"/> Sí
-                            </label>
-                            <label class="flex items-center gap-2 cursor-pointer font-body text-body text-on-surface">
-                                <input type="radio" name="has_dni" value="no" class="accent-primary-container w-4 h-4"/> No
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Nivel de estudios -->
-                <div class="flex flex-col gap-1.5">
-                    <label class="font-label text-label text-on-surface" for="cf-estudios">Nivel de estudios <span class="text-error">*</span></label>
-                    <select id="cf-estudios" name="estudios" required
-                        class="h-12 px-4 rounded-lg border border-outline focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 font-body text-body text-on-surface bg-white outline-none transition">
-                        <option value="">Selecciona una opción</option>
-                        <option value="sin_estudios">Sin estudios</option>
-                        <option value="primaria">Educación Primaria</option>
-                        <option value="eso">ESO</option>
-                        <option value="bachillerato">Bachillerato</option>
-                        <option value="fp_basica">FP Básica</option>
-                        <option value="fp_media">FP de Grado Medio</option>
-                        <option value="fp_superior">FP de Grado Superior</option>
-                        <option value="universidad">Universidad (Grado/Licenciatura)</option>
-                        <option value="posgrado">Máster / Posgrado</option>
-                        <option value="doctorado">Doctorado</option>
-                    </select>
-                </div>
-
-                <!-- Dirección -->
-                <div class="flex flex-col gap-1.5">
-                    <label class="font-label text-label text-on-surface" for="cf-direccion">Dirección <span class="text-error">*</span></label>
-                    <input id="cf-direccion" name="direccion" type="text" required placeholder="Calle Mayor 1, 28001 Madrid"
-                        class="h-12 px-4 rounded-lg border border-outline focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 font-body text-body text-on-surface bg-white outline-none transition"/>
-                </div>
-
-                <!-- Trabajo actual (opcional) -->
-                <div class="flex flex-col gap-1.5">
-                    <label class="font-label text-label text-on-surface" for="cf-trabajo">Trabajo actual <span class="text-on-surface-variant font-normal">(opcional)</span></label>
-                    <input id="cf-trabajo" name="trabajo" type="text" placeholder="Ej: Administrativo en empresa X"
-                        class="h-12 px-4 rounded-lg border border-outline focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 font-body text-body text-on-surface bg-white outline-none transition"/>
-                </div>
-
-                <button id="cf-submit" type="submit"
-                    class="h-12 bg-primary-container text-on-primary-container font-label text-label px-6 rounded-lg hover:opacity-90 transition-opacity active:scale-95 shadow-sm flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
-                    <span id="cf-btn-text">Enviar solicitud</span>
-                    <span id="cf-btn-spinner" class="hidden material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
-                </button>
-
-                <div class="flex flex-wrap justify-center items-center gap-6 text-sm text-on-surface-variant pt-2">
-                    <div class="flex items-center gap-2">
-                        <span class="material-symbols-outlined text-surface-tint text-[18px]">verified_user</span>
-                        <span class="font-label text-label">Cumple RGPD</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="material-symbols-outlined text-surface-tint text-[18px]">lock</span>
-                        <span class="font-label text-label">Cifrado 256 bits</span>
-                    </div>
-                </div>
-            </form>
+        <p>"La resolución de identidad es un cambio de paradigma. Por fin vemos el viaje completo del cliente desde el primer contacto hasta la compra. Nuestro CAC bajó un 30%."</p>
+        <div class="testi-author">
+          <div class="testi-avatar">MR</div>
+          <div>
+            <div class="testi-name">Miguel Romero</div>
+            <div class="testi-role">Head of Growth · GrowthHub</div>
+          </div>
         </div>
-    </section>
-</main>
-<!-- Footer -->
-<footer class="bg-slate-50 dark:bg-slate-950 w-full pt-16 pb-8 border-t border-slate-200 dark:border-slate-800 text-sm font-['Inter'] leading-relaxed flat no-shadows opacity-100 hover:opacity-80 transition-opacity">
-<div class="max-w-[1280px] mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-12 mb-12">
-<div>
-<h4 class="font-semibold text-slate-900 dark:text-white mb-4">Product</h4>
-<ul class="space-y-3">
-<li><a class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" href="#features">Features</a></li>
-<li><a class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" href="#pricing">Pricing</a></li>
-</ul>
-</div>
-<div>
-<h4 class="font-semibold text-slate-900 dark:text-white mb-4">Developers</h4>
-<ul class="space-y-3">
-<li><a class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" href="#">Docs</a></li>
-</ul>
-</div>
-<div>
-<h4 class="font-semibold text-slate-900 dark:text-white mb-4">Company</h4>
-<ul class="space-y-3">
-<li><a class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" href="#">About</a></li>
-<li><a class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" href="#">Blog</a></li>
-<li><a class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" href="#">Careers</a></li>
-</ul>
-</div>
-<div>
-<h4 class="font-semibold text-slate-900 dark:text-white mb-4">Legal</h4>
-<ul class="space-y-3">
-<li><a class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" href="#">Privacy</a></li>
-<li><a class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" href="#">Terms</a></li>
-<li><a class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" href="#">Security</a></li>
-</ul>
-</div>
-</div>
-<div class="max-w-[1280px] mx-auto px-6 border-t border-slate-200 dark:border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-<div class="flex items-center gap-2">
-<span class="text-xl font-bold text-slate-900 dark:text-white">Zentria</span>
-</div>
-            <p class="text-slate-500 dark:text-slate-400">© 2026 Zentria SDK. Reliable tracking for high-performance teams.</p>
-</div>
+      </div>
+      <div class="card testi-card anim-up delay-2">
+        <div class="stars">
+          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
+          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
+          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
+          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
+          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
+        </div>
+        <p>"Por fin un tracking que simplemente funciona. Sin píxeles perdidos, sin agujeros negros en la atribución. Zentria lo gestiona todo de forma transparente y fiable."</p>
+        <div class="testi-author">
+          <div class="testi-avatar">EW</div>
+          <div>
+            <div class="testi-name">Elena Winters</div>
+            <div class="testi-role">Directora de Marketing · ScaleAI</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="precios" class="section section-dark">
+  <div class="container">
+    <div class="section-header">
+      <span class="pill" style="margin-bottom:16px;display:inline-flex;">Precios</span>
+      <h2>Precios simples y transparentes</h2>
+      <p>Escala sin preocuparte por sorpresas en la factura.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="card price-card anim-up">
+        <div class="price-name">Starter</div>
+        <div class="price-num">29€</div>
+        <div class="price-period">/mes · facturación mensual</div>
+        <div class="price-desc">Perfecto para proyectos pequeños y equipos que empiezan.</div>
+        <ul class="price-features">
+          <li><span class="material-symbols-outlined">check</span>10.000 eventos/mes</li>
+          <li><span class="material-symbols-outlined">check</span>1 sitio web</li>
+          <li><span class="material-symbols-outlined">check</span>Analíticas básicas</li>
+          <li><span class="material-symbols-outlined">check</span>Soporte por email</li>
+        </ul>
+        <a href="#contacto" class="btn-ghost" style="width:100%;">Empezar gratis</a>
+      </div>
+      <div class="card price-card featured anim-up delay-1">
+        <div class="price-badge">Más popular</div>
+        <div class="price-name">Pro</div>
+        <div class="price-num">99€</div>
+        <div class="price-period">/mes · facturación mensual</div>
+        <div class="price-desc">Para negocios en crecimiento que necesitan funciones avanzadas.</div>
+        <ul class="price-features">
+          <li><span class="material-symbols-outlined">check</span>100.000 eventos/mes</li>
+          <li><span class="material-symbols-outlined">check</span>Sitios ilimitados</li>
+          <li><span class="material-symbols-outlined">check</span>Analíticas avanzadas</li>
+          <li><span class="material-symbols-outlined">check</span>Integración CRM</li>
+          <li><span class="material-symbols-outlined">check</span>Soporte prioritario</li>
+        </ul>
+        <a href="#contacto" class="btn-primary" style="width:100%;">Probar Pro gratis</a>
+      </div>
+      <div class="card price-card anim-up delay-2">
+        <div class="price-name">Enterprise</div>
+        <div class="price-num" style="font-size:2rem;">A medida</div>
+        <div class="price-period">precio según volumen</div>
+        <div class="price-desc">Para grandes organizaciones con necesidades de seguridad personalizadas.</div>
+        <ul class="price-features">
+          <li><span class="material-symbols-outlined">check</span>Eventos ilimitados</li>
+          <li><span class="material-symbols-outlined">check</span>Integraciones custom</li>
+          <li><span class="material-symbols-outlined">check</span>SLA garantizado</li>
+          <li><span class="material-symbols-outlined">check</span>Account manager dedicado</li>
+        </ul>
+        <a href="#contacto" class="btn-ghost" style="width:100%;">Hablar con ventas</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT FORM -->
+<section id="contacto" class="section">
+  <div class="container">
+    <div class="form-wrap">
+      <div class="form-header">
+        <span class="pill" style="margin-bottom:16px;display:inline-flex;">Contacto</span>
+        <h2>Solicita información</h2>
+        <p>Rellena el formulario y nos ponemos en contacto contigo en menos de 24 horas.</p>
+      </div>
+
+      <div id="form-success" class="card form-success">
+        <span class="material-symbols-outlined check-icon" style="font-variation-settings:'FILL' 1;">check_circle</span>
+        <h3>¡Solicitud recibida!</h3>
+        <p style="margin-top:8px;">Nos pondremos en contacto contigo en breve.</p>
+      </div>
+
+      <div id="form-error" class="form-error-box"></div>
+
+      <form id="contact-form" class="contact-form" novalidate>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="cf-name">Nombre completo <span class="req">*</span></label>
+            <input id="cf-name" name="name" type="text" required placeholder="Juan García" class="form-input"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="cf-email">Email <span class="req">*</span></label>
+            <input id="cf-email" name="email" type="email" required placeholder="juan@empresa.com" class="form-input"/>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="cf-phone">Teléfono <span class="req">*</span></label>
+            <input id="cf-phone" name="phone" type="tel" required placeholder="+34 600 000 000" class="form-input"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="cf-dni">DNI / NIE <span class="req">*</span></label>
+            <input id="cf-dni" name="dni" type="text" required placeholder="12345678A o X1234567A" class="form-input"/>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">¿Eres mayor de 18 años? <span class="req">*</span></label>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" name="adult" value="si" required/> Sí
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="adult" value="no"/> No
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="cf-estudios">Nivel de estudios <span class="req">*</span></label>
+          <select id="cf-estudios" name="estudios" required class="form-input">
+            <option value="">Selecciona una opción</option>
+            <option value="sin_estudios">Sin estudios</option>
+            <option value="primaria">Educación Primaria</option>
+            <option value="eso">ESO</option>
+            <option value="bachillerato">Bachillerato</option>
+            <option value="fp_basica">FP Básica</option>
+            <option value="fp_media">FP de Grado Medio</option>
+            <option value="fp_superior">FP de Grado Superior</option>
+            <option value="universidad">Universidad (Grado/Licenciatura)</option>
+            <option value="posgrado">Máster / Posgrado</option>
+            <option value="doctorado">Doctorado</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="cf-postal">Código postal <span class="req">*</span></label>
+            <input id="cf-postal" name="postal" type="text" required placeholder="28001" maxlength="5" pattern="[0-9]{5}" class="form-input"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="cf-trabajo">Trabajo actual <span style="color:var(--text-muted);font-weight:400;">(opcional)</span></label>
+            <input id="cf-trabajo" name="trabajo" type="text" placeholder="Ej: Administrativo" class="form-input"/>
+          </div>
+        </div>
+
+        <button id="cf-submit" type="submit" class="btn-submit">
+          <span id="cf-btn-text">Enviar solicitud</span>
+          <span id="cf-btn-spinner" class="material-symbols-outlined spin" style="display:none;font-size:18px;">progress_activity</span>
+        </button>
+
+        <div class="form-trust">
+          <div class="form-trust-item">
+            <span class="material-symbols-outlined">verified_user</span>
+            Cumple RGPD
+          </div>
+          <div class="form-trust-item">
+            <span class="material-symbols-outlined">lock</span>
+            Cifrado 256 bits
+          </div>
+          <div class="form-trust-item">
+            <span class="material-symbols-outlined">support_agent</span>
+            Respuesta en 24h
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-logo">Zentria<span class="dot">.</span></div>
+        <p>Seguimiento de conversiones con precisión absoluta para equipos que priorizan los datos.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Producto</h4>
+        <ul>
+          <li><a href="#features">Funcionalidades</a></li>
+          <li><a href="#precios">Precios</a></li>
+          <li><a href="#">Documentación</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Empresa</h4>
+        <ul>
+          <li><a href="#">Sobre nosotros</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Empleo</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="#">Privacidad</a></li>
+          <li><a href="#">Términos</a></li>
+          <li><a href="#">Seguridad</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Zentria. Todos los derechos reservados.</span>
+      <span>Hecho con precisión en España 🇪🇸</span>
+    </div>
+  </div>
 </footer>
+
 <script src="js/zentria-config.js"></script>
 <script src="js/sdk.iife.js"></script>
 <script>
   if (typeof ZentriaTracking !== 'undefined') {
     var _cfg = window.ZENTRIA_CONFIG || {};
     ZentriaTracking.init({
-      apiKey: _cfg.apiKey || 'dev_key_change_in_production',
-      endpoint: _cfg.endpoint || 'http://localhost:3000',
-      debug: _cfg.debug !== undefined ? _cfg.debug : true,
+      apiKey:    _cfg.apiKey    || 'dev_key_change_in_production',
+      endpoint:  _cfg.endpoint  || 'http://localhost:3000',
+      debug:     _cfg.debug     !== undefined ? _cfg.debug : true,
     });
   }
 </script>
@@ -613,7 +1231,6 @@ tracker.identify(<span class="text-[#10B981]">'user_456'</span>, {
       };
     }
 
-    // DNI: 8 dígitos + letra. NIE: X/Y/Z + 7 dígitos + letra.
     function isValidDni(value) {
       return /^[0-9]{8}[A-Za-z]$/.test(value) || /^[XYZxyz][0-9]{7}[A-Za-z]$/.test(value);
     }
@@ -629,25 +1246,21 @@ tracker.identify(<span class="text-[#10B981]">'user_456'</span>, {
     var WEBHOOK_URL   = _cfg.webhookUrl   || '';
     var WEBHOOK_TOKEN = _cfg.webhookToken || '';
 
-    if (!WEBHOOK_URL) {
-      console.warn('[Zentria] webhookUrl not configured in zentria-config.js');
-    }
+    if (!WEBHOOK_URL) console.warn('[Zentria] webhookUrl not configured in zentria-config.js');
 
     function setLoading(loading) {
       submit.disabled = loading;
       btnText.textContent = loading ? 'Enviando...' : 'Enviar solicitud';
-      spinner.classList.toggle('hidden', !loading);
+      spinner.style.display = loading ? 'inline-block' : 'none';
     }
 
     function showError(msg) {
       errorBox.textContent = msg;
-      errorBox.classList.remove('hidden');
+      errorBox.style.display = 'block';
       errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
-    function hideError() {
-      errorBox.classList.add('hidden');
-    }
+    function hideError() { errorBox.style.display = 'none'; }
 
     function getRadio(name) {
       var el = document.querySelector('input[name="' + name + '"]:checked');
@@ -658,74 +1271,57 @@ tracker.identify(<span class="text-[#10B981]">'user_456'</span>, {
       e.preventDefault();
       hideError();
 
-      var name      = document.getElementById('cf-name').value.trim();
-      var email     = document.getElementById('cf-email').value.trim();
-      var phone     = document.getElementById('cf-phone').value.trim();
-      var dni       = document.getElementById('cf-dni').value.trim().toUpperCase();
-      var adult     = getRadio('adult');
-      var has_dni   = getRadio('has_dni');
-      var estudios  = document.getElementById('cf-estudios').value;
-      var direccion = document.getElementById('cf-direccion').value.trim();
-      var trabajo   = document.getElementById('cf-trabajo').value.trim();
+      var name     = document.getElementById('cf-name').value.trim();
+      var email    = document.getElementById('cf-email').value.trim();
+      var phone    = document.getElementById('cf-phone').value.trim();
+      var dni      = document.getElementById('cf-dni').value.trim().toUpperCase();
+      var adult    = getRadio('adult');
+      var estudios = document.getElementById('cf-estudios').value;
+      var postal   = document.getElementById('cf-postal').value.trim();
+      var trabajo  = document.getElementById('cf-trabajo').value.trim();
 
-      // Validaciones requeridas
-      if (!name)      { showError('El nombre completo es obligatorio.'); return; }
-      if (!email)     { showError('El email es obligatorio.'); return; }
-      if (!phone)     { showError('El teléfono es obligatorio.'); return; }
-      if (!dni)       { showError('El DNI / NIE es obligatorio.'); return; }
-      if (!adult)     { showError('Indica si eres mayor de 18 años.'); return; }
-      if (!has_dni)   { showError('Indica si posees DNI o NIE español.'); return; }
-      if (!estudios)  { showError('Selecciona tu nivel de estudios.'); return; }
-      if (!direccion) { showError('La dirección es obligatoria.'); return; }
+      if (!name)     { showError('El nombre completo es obligatorio.'); return; }
+      if (!email)    { showError('El email es obligatorio.'); return; }
+      if (!phone)    { showError('El teléfono es obligatorio.'); return; }
+      if (!dni)      { showError('El DNI / NIE es obligatorio.'); return; }
+      if (!adult)    { showError('Indica si eres mayor de 18 años.'); return; }
+      if (!estudios) { showError('Selecciona tu nivel de estudios.'); return; }
+      if (!postal)   { showError('El código postal es obligatorio.'); return; }
 
-      // Validación formato DNI/NIE
       if (!isValidDni(dni)) {
         showError('El DNI debe tener 8 dígitos y una letra (ej: 12345678A). El NIE debe empezar por X, Y o Z (ej: X1234567A).');
         return;
       }
 
-      // Determinar si el lead está descalificado
       var disqualified = false;
       var disqualifyReasons = [];
-
-      if (adult === 'no') {
-        disqualified = true;
-        disqualifyReasons.push('menor de 18 años');
-      }
-      if (has_dni === 'no') {
-        disqualified = true;
-        disqualifyReasons.push('no posee DNI/NIE español');
-      }
+      if (adult === 'no') { disqualified = true; disqualifyReasons.push('menor de 18 años'); }
 
       var utms = getUtmParams();
       var nameParts = name.split(' ');
 
       var payload = {
-        firstname:    nameParts.slice(0, -1).join(' ') || name,
-        lastname:     nameParts.slice(-1)[0] || '',
-        email:        email,
-        phone:        phone,
-        dni:          dni,
-        adult:        adult,
-        has_dni:      has_dni,
-        estudios:     estudios,
-        direccion:    direccion,
-        trabajo:      trabajo,
-        disqualified: disqualified,
+        firstname:          nameParts.slice(0, -1).join(' ') || name,
+        lastname:           nameParts.slice(-1)[0] || '',
+        email:              email,
+        phone:              phone,
+        dni:                dni,
+        adult:              adult,
+        estudios:           estudios,
+        postal:             postal,
+        trabajo:            trabajo,
+        disqualified:       disqualified,
         disqualify_reasons: disqualifyReasons,
-        source:       utms.source,
-        medium:       utms.medium,
-        campaign:     utms.campaign,
+        source:             utms.source,
+        medium:             utms.medium,
+        campaign:           utms.campaign,
       };
 
       setLoading(true);
 
       fetch(WEBHOOK_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-webhook-token': WEBHOOK_TOKEN,
-        },
+        headers: { 'Content-Type': 'application/json', 'x-webhook-token': WEBHOOK_TOKEN },
         body: JSON.stringify(payload),
       })
         .then(function (res) {
@@ -733,48 +1329,31 @@ tracker.identify(<span class="text-[#10B981]">'user_456'</span>, {
           return res.json();
         })
         .then(function () {
-          form.classList.add('hidden');
-          success.classList.remove('hidden');
-          if (typeof ZentriaTracking !== 'undefined') {
-            ZentriaTracking.identifyUser(email);
-          }
+          form.style.display = 'none';
+          success.style.display = 'block';
+          if (typeof ZentriaTracking !== 'undefined') ZentriaTracking.identifyUser(email);
         })
         .catch(function (err) {
           showError(err.message || 'Algo ha ido mal. Por favor, inténtalo de nuevo.');
         })
-        .finally(function () {
-          setLoading(false);
-        });
+        .finally(function () { setLoading(false); });
     });
   })();
 </script>
 <script>
-  // Mobile menu toggle
   (function() {
-    const toggle = document.getElementById('menu-toggle');
-    const menu = document.getElementById('mobile-menu');
-    if (!toggle || !menu) return;
-    toggle.addEventListener('click', function() {
-      const isOpen = !menu.classList.contains('hidden');
-      if (isOpen) {
-        menu.classList.add('hidden');
-        menu.classList.remove('flex');
-        toggle.setAttribute('aria-expanded', 'false');
-        toggle.querySelector('.material-symbols-outlined').textContent = 'menu';
-      } else {
-        menu.classList.remove('hidden');
-        menu.classList.add('flex');
-        toggle.setAttribute('aria-expanded', 'true');
-        toggle.querySelector('.material-symbols-outlined').textContent = 'close';
-      }
+    var btn  = document.getElementById('menu-btn');
+    var menu = document.getElementById('mobile-menu');
+    if (!btn || !menu) return;
+    btn.addEventListener('click', function() {
+      var open = menu.style.display === 'flex';
+      menu.style.display = open ? 'none' : 'flex';
+      btn.querySelector('.material-symbols-outlined').textContent = open ? 'menu' : 'close';
     });
-    // Close menu when clicking a link
-    menu.querySelectorAll('a').forEach(function(link) {
-      link.addEventListener('click', function() {
-        menu.classList.add('hidden');
-        menu.classList.remove('flex');
-        toggle.setAttribute('aria-expanded', 'false');
-        toggle.querySelector('.material-symbols-outlined').textContent = 'menu';
+    menu.querySelectorAll('a').forEach(function(a) {
+      a.addEventListener('click', function() {
+        menu.style.display = 'none';
+        btn.querySelector('.material-symbols-outlined').textContent = 'menu';
       });
     });
   })();

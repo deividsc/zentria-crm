@@ -5,7 +5,7 @@
       "parameters": {
         "httpMethod": "POST",
         "path": "lead-webform",
-        "authentication": "headerAuth",
+        "authentication": "none",
         "responseMode": "responseNode",
         "options": {}
       },
@@ -58,7 +58,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const body = $('Webhook').item.json.body;\n\nreturn [{\n  json: {\n    firstname:           (body.firstname    || '').trim(),\n    lastname:            (body.lastname     || '').trim(),\n    email:               (body.email        || '').trim().toLowerCase(),\n    phone:               (body.phone        || '').trim(),\n    dni:                 (body.dni          || '').trim().toUpperCase(),\n    adult:               (body.adult        || '').trim(),\n    has_dni:             (body.has_dni      || '').trim(),\n    estudios:            (body.estudios     || '').trim(),\n    direccion:           (body.direccion    || '').trim(),\n    trabajo:             (body.trabajo      || '').trim(),\n    disqualified:        body.disqualified  === true,\n    disqualify_reasons:  Array.isArray(body.disqualify_reasons) ? body.disqualify_reasons : [],\n    source:              (body.source       || '').trim(),\n    medium:              (body.medium       || '').trim(),\n    campaign:            (body.campaign     || '').trim(),\n  }\n}];"
+        "jsCode": "const body = $('Webhook').item.json.body;\n\nreturn [{\n  json: {\n    firstname:           (body.firstname    || '').trim(),\n    lastname:            (body.lastname     || '').trim(),\n    email:               (body.email        || '').trim().toLowerCase(),\n    phone:               (body.phone        || '').trim(),\n    dni:                 (body.dni          || '').trim().toUpperCase(),\n    adult:               (body.adult        || '').trim(),\n    estudios:            (body.estudios     || '').trim(),\n    postal:              (body.postal       || '').trim(),\n    trabajo:             (body.trabajo      || '').trim(),\n    disqualified:        body.disqualified  === true,\n    disqualify_reasons:  Array.isArray(body.disqualify_reasons) ? body.disqualify_reasons : [],\n    source:              (body.source       || '').trim(),\n    medium:              (body.medium       || '').trim(),\n    campaign:            (body.campaign     || '').trim(),\n  }\n}];"
       },
       "id": "node-normalize",
       "name": "Normalize Data",
@@ -69,10 +69,10 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://odoo:8069/web/session/authenticate",
+        "url": "={{ $env.ODOO_URL }}/web/session/authenticate",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={ \"jsonrpc\": \"2.0\", \"method\": \"call\", \"params\": { \"db\": \"odoo\", \"login\": \"admin\", \"password\": \"admin\" } }",
+        "jsonBody": "={{ JSON.stringify({ jsonrpc: '2.0', method: 'call', params: { db: $env.ODOO_DB, login: $env.ODOO_LOGIN, password: $env.ODOO_PASSWORD } }) }}",
         "options": {
           "response": {
             "response": {
@@ -102,7 +102,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://odoo:8069/web/dataset/call_kw",
+        "url": "={{ $env.ODOO_URL }}/web/dataset/call_kw",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -134,7 +134,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://odoo:8069/web/dataset/call_kw",
+        "url": "={{ $env.ODOO_URL }}/web/dataset/call_kw",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -166,7 +166,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://odoo:8069/web/dataset/call_kw",
+        "url": "={{ $env.ODOO_URL }}/web/dataset/call_kw",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -187,7 +187,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const prev = $('After Medium').item.json;\nconst result = $json.result || [];\nconst campaignId = result.length > 0 ? result[0].id : null;\n\nconst fullName = [prev.firstname, prev.lastname].filter(Boolean).join(' ');\n\n// Construir descripción con todos los datos del formulario\nconst estudiosLabels = {\n  sin_estudios: 'Sin estudios',\n  primaria: 'Educación Primaria',\n  eso: 'ESO',\n  bachillerato: 'Bachillerato',\n  fp_basica: 'FP Básica',\n  fp_media: 'FP de Grado Medio',\n  fp_superior: 'FP de Grado Superior',\n  universidad: 'Universidad (Grado/Licenciatura)',\n  posgrado: 'Máster / Posgrado',\n  doctorado: 'Doctorado',\n};\n\nconst lines = [\n  `DNI/NIE: ${prev.dni}`,\n  `Mayor de 18 años: ${prev.adult === 'si' ? 'Sí' : 'No'}`,\n  `Posee DNI/NIE español: ${prev.has_dni === 'si' ? 'Sí' : 'No'}`,\n  `Nivel de estudios: ${estudiosLabels[prev.estudios] || prev.estudios}`,\n  `Dirección: ${prev.direccion}`,\n];\n\nif (prev.trabajo) lines.push(`Trabajo actual: ${prev.trabajo}`);\n\nif (prev.disqualified && prev.disqualify_reasons.length > 0) {\n  lines.push(`⚠️ DESCALIFICADO: ${prev.disqualify_reasons.join(', ')}`);\n}\n\nconst description = lines.join('\\n');\n\nconst leadValues = {\n  name:         fullName || prev.email,\n  contact_name: fullName,\n  email_from:   prev.email,\n  phone:        prev.phone || false,\n  description:  description,\n  type:         'lead',\n  priority:     prev.disqualified ? '0' : '1',\n};\n\nif (prev.sourceId)  leadValues.source_id   = prev.sourceId;\nif (prev.mediumId)  leadValues.medium_id   = prev.mediumId;\nif (campaignId)     leadValues.campaign_id = campaignId;\n\nconst createBody = JSON.stringify({\n  jsonrpc: '2.0',\n  method: 'call',\n  params: {\n    model: 'crm.lead',\n    method: 'create',\n    args: [leadValues],\n    kwargs: { context: {} }\n  }\n});\n\nreturn [{ json: { createBody, cookie: prev.cookie, disqualified: prev.disqualified } }];"
+        "jsCode": "const prev = $('After Medium').item.json;\nconst result = $json.result || [];\nconst campaignId = result.length > 0 ? result[0].id : null;\n\nconst fullName = [prev.firstname, prev.lastname].filter(Boolean).join(' ');\n\nconst estudiosLabels = {\n  sin_estudios: 'Sin estudios',\n  primaria: 'Educación Primaria',\n  eso: 'ESO',\n  bachillerato: 'Bachillerato',\n  fp_basica: 'FP Básica',\n  fp_media: 'FP de Grado Medio',\n  fp_superior: 'FP de Grado Superior',\n  universidad: 'Universidad (Grado/Licenciatura)',\n  posgrado: 'Máster / Posgrado',\n  doctorado: 'Doctorado',\n};\n\nconst lines = [\n  `DNI/NIE: ${prev.dni}`,\n  `Mayor de 18 años: ${prev.adult === 'si' ? 'Sí' : 'No'}`,\n  `Nivel de estudios: ${estudiosLabels[prev.estudios] || prev.estudios}`,\n  `Código postal: ${prev.postal}`,\n];\n\nif (prev.trabajo) lines.push(`Trabajo actual: ${prev.trabajo}`);\n\nif (prev.disqualified && prev.disqualify_reasons.length > 0) {\n  lines.push(`⚠️ DESCALIFICADO: ${prev.disqualify_reasons.join(', ')}`);\n}\n\nconst description = lines.join('\\n');\n\nconst leadValues = {\n  name:         fullName || prev.email,\n  contact_name: fullName,\n  email_from:   prev.email,\n  phone:        prev.phone || false,\n  description:  description,\n  type:         'lead',\n  priority:     prev.disqualified ? '0' : '1',\n};\n\nif (prev.sourceId)  leadValues.source_id   = prev.sourceId;\nif (prev.mediumId)  leadValues.medium_id   = prev.mediumId;\nif (campaignId)     leadValues.campaign_id = campaignId;\n\nconst createBody = JSON.stringify({\n  jsonrpc: '2.0',\n  method: 'call',\n  params: {\n    model: 'crm.lead',\n    method: 'create',\n    args: [leadValues],\n    kwargs: { context: {} }\n  }\n});\n\nreturn [{ json: { createBody, cookie: prev.cookie, disqualified: prev.disqualified } }];"
       },
       "id": "node-build-lead",
       "name": "Build Lead Object",
@@ -198,7 +198,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://odoo:8069/web/dataset/call_kw",
+        "url": "={{ $env.ODOO_URL }}/web/dataset/call_kw",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [

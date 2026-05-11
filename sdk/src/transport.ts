@@ -13,6 +13,13 @@ export interface TransportConfig {
   retryDelayMs?: number;
 }
 
+export interface SendBatchResult {
+  sent: string[];
+  failed: string[];
+  rateLimited: boolean;
+  retryAfterMs?: number;
+}
+
 const DEFAULT_RETRIES = 3;
 const DEFAULT_RETRY_DELAY = 1000;
 
@@ -29,7 +36,7 @@ function delay(ms: number): Promise<void> {
 export async function sendBatch(
   events: QueuedEvent[],
   config: TransportConfig
-): Promise<{ sent: string[]; failed: string[] }> {
+): Promise<SendBatchResult> {
   const retries = config.retries ?? DEFAULT_RETRIES;
   const retryDelay = config.retryDelayMs ?? DEFAULT_RETRY_DELAY;
   const payload = {
@@ -56,19 +63,26 @@ export async function sendBatch(
           'X-API-Key': config.apiKey,
         },
         body: JSON.stringify(payload),
-        keepalive: attempt === retries, // keepalive on last attempt
+        keepalive: attempt === retries,
       });
 
       if (response.ok) {
-        return { sent: events.map((e) => e.eventId), failed: [] };
+        return { sent: events.map((e) => e.eventId), failed: [], rateLimited: false };
       }
 
-      // Non-retryable status codes
+      // Rate limited — don't retry immediately, let the caller back off
+      if (response.status === 429) {
+        const retryAfter = response.headers.get('Retry-After');
+        const retryAfterMs = retryAfter ? parseInt(retryAfter, 10) * 1000 : 60_000;
+        return { sent: [], failed: events.map((e) => e.eventId), rateLimited: true, retryAfterMs };
+      }
+
+      // Non-retryable: auth/validation errors
       if (response.status === 400 || response.status === 401 || response.status === 403) {
         break;
       }
     } catch {
-      // network or other error — will retry
+      // network error — will retry
     }
 
     if (attempt < retries) {
@@ -76,7 +90,7 @@ export async function sendBatch(
     }
   }
 
-  return { sent: [], failed: events.map((e) => e.eventId) };
+  return { sent: [], failed: events.map((e) => e.eventId), rateLimited: false };
 }
 
 /**
