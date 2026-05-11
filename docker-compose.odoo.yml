@@ -60,6 +60,7 @@ services:
       N8N_SECURE_COOKIE: "false"
       N8N_CORS_ENABLE: "true"
       N8N_CORS_ALLOWED_ORIGINS: "*"
+      N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"
       ODOO_URL: ${ODOO_URL:-http://odoo:8069}
       ODOO_DB: ${ODOO_DB:-odoo}
       ODOO_LOGIN: ${ODOO_LOGIN:-admin}

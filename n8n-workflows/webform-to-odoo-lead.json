@@ -47,13 +47,13 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={ \"error\": \"Missing required fields: firstname and email are required\" }",
+        "responseBody": "{\"error\":\"Missing required fields: firstname and email are required\"}",
         "options": { "responseCode": 400 }
       },
       "id": "node-400",
       "name": "400 Bad Request",
       "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.1,
+      "typeVersion": 1,
       "position": [-960, 240]
     },
     {
@@ -220,25 +220,25 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ JSON.stringify({ status: 'ok', lead_id: $json.result }) }}",
+        "responseBody": "{\"status\":\"ok\"}",
         "options": { "responseCode": 200 }
       },
       "id": "node-200",
       "name": "200 OK",
       "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.1,
+      "typeVersion": 1,
       "position": [1680, -120]
     },
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={ \"error\": \"Failed to create lead in Odoo\" }",
+        "responseBody": "{\"error\":\"Failed to create lead in Odoo\"}",
         "options": { "responseCode": 500 }
       },
       "id": "node-500",
       "name": "500 Odoo Error",
       "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.1,
+      "typeVersion": 1,
       "position": [1680, 120]
     }
   ],
@@ -278,5 +278,5 @@
   "meta": {
     "templateCredsSetupCompleted": false
   },
-  "tags": ["zentria", "leads", "odoo"]
+  "tags": []
 }
