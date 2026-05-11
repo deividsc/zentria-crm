@@ -3,6 +3,8 @@ import { Client } from 'pg';
 import { execSync } from 'child_process';
 
 const DB_URL = process.env.DATABASE_URL || 'postgresql://zentria:zentria_dev@localhost:5433/zentria_tracking';
+const API_URL = process.env.API_URL || 'http://localhost:3000';
+const LANDING_URL = process.env.BASE_URL || 'http://localhost:8082';
 const ODOO_URL = process.env.ODOO_URL || 'http://localhost:8069';
 const ODOO_DB = process.env.ODOO_DB || 'odoo';
 const ODOO_USER = process.env.ODOO_API_USER || 'admin';
@@ -227,7 +229,7 @@ test.describe('Suite 3: Behavioral bot detection', () => {
         eventType: 'form_submit',
         eventData: { durationMs: 300, email: botEmail, name: 'Bot User' },
         timestamp: new Date().toISOString(),
-        pageUrl: 'http://localhost:8082/',
+        pageUrl: `${LANDING_URL}/`,
         pageTitle: 'Zentria Tracking SDK',
         anonymousId,
         knownId: null,
@@ -235,12 +237,12 @@ test.describe('Suite 3: Behavioral bot detection', () => {
       }],
     };
 
-    const response = await page.request.post('http://localhost:3000/api/v1/events', {
+    const response = await page.request.post(`${API_URL}/api/v1/events`, {
       data: payload,
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': 'zt_live_dev',
-        'Origin': 'http://localhost:8082',
+        'Origin': LANDING_URL,
       },
     });
     expect(response.status()).toBe(201);
@@ -282,7 +284,7 @@ test.describe('Suite 4: Disposable email detection', () => {
           email: disposableEmail,
         },
         timestamp: new Date().toISOString(),
-        pageUrl: 'http://localhost:8082/',
+        pageUrl: `${LANDING_URL}/`,
         pageTitle: 'Zentria Tracking SDK',
         anonymousId,
         knownId: disposableEmail,
@@ -290,12 +292,12 @@ test.describe('Suite 4: Disposable email detection', () => {
       }],
     };
 
-    const response = await page.request.post('http://localhost:3000/api/v1/events', {
+    const response = await page.request.post(`${API_URL}/api/v1/events`, {
       data: payload,
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': 'zt_live_dev',
-        'Origin': 'http://localhost:8082',
+        'Origin': LANDING_URL,
       },
     });
     expect(response.status()).toBe(201);
@@ -329,7 +331,7 @@ test.describe('Suite 4: Disposable email detection', () => {
           email: legitimateEmail,
         },
         timestamp: new Date().toISOString(),
-        pageUrl: 'http://localhost:8082/',
+        pageUrl: `${LANDING_URL}/`,
         pageTitle: 'Zentria Tracking SDK',
         anonymousId,
         knownId: legitimateEmail,
@@ -337,12 +339,12 @@ test.describe('Suite 4: Disposable email detection', () => {
       }],
     };
 
-    const response = await page.request.post('http://localhost:3000/api/v1/events', {
+    const response = await page.request.post(`${API_URL}/api/v1/events`, {
       data: payload,
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': 'zt_live_dev',
-        'Origin': 'http://localhost:8082',
+        'Origin': LANDING_URL,
       },
     });
     expect(response.status()).toBe(201);
