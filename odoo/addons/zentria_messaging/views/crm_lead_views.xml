@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Botón "Enviar mensaje" en la cabecera de la ficha del lead -->
+    <record id="view_crm_lead_zentria_messaging" model="ir.ui.view">
+        <field name="name">crm.lead.zentria.messaging</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
+                <button name="action_open_send_message"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-comment"
+                        string="Enviar mensaje"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

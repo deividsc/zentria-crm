@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_zentria_send_message_wizard_form" model="ir.ui.view">
+        <field name="name">zentria.send.message.wizard.form</field>
+        <field name="model">zentria.send.message.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Enviar mensaje">
+                <field name="channel_available" invisible="1"/>
+                <group>
+                    <field name="lead_id" invisible="1"/>
+                    <field name="channel" widget="radio"/>
+                </group>
+
+                <group>
+                    <field name="phone"
+                           invisible="channel != 'whatsapp'"
+                           readonly="1"
+                           string="Teléfono del lead"/>
+                    <field name="email"
+                           invisible="channel != 'email'"
+                           readonly="1"
+                           string="Email del lead"/>
+                </group>
+
+                <div class="alert alert-warning"
+                     invisible="not warning"
+                     role="alert">
+                    <field name="warning" readonly="1" nolabel="1"/>
+                </div>
+
+                <group>
+                    <field name="message"
+                           placeholder="Escribí el mensaje..."
+                           widget="text"
+                           nolabel="1"/>
+                </group>
+
+                <footer>
+                    <button name="action_send"
+                            string="Enviar"
+                            type="object"
+                            class="btn-primary"
+                            invisible="not channel_available"/>
+                    <button string="Cancelar"
+                            class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>
