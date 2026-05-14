@@ -90,7 +90,10 @@ class ZentriaSendMessageWizard(models.TransientModel):
             )
             with urllib.request.urlopen(req, timeout=10) as response:
                 result = json.loads(response.read().decode('utf-8'))
-                if not result.get('ok'):
+                # n8n async webhooks respond with {"message":"Workflow was started"}
+                # zentria-messaging direct calls respond with {"ok": true}
+                success = result.get('ok') or result.get('message') == 'Workflow was started'
+                if not success:
                     raise UserError(_('El servicio de mensajería devolvió un error: %s') % str(result))
         except urllib.error.HTTPError as e:
             body = e.read().decode('utf-8', errors='replace')

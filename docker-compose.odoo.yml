@@ -65,6 +65,8 @@ services:
       ODOO_DB: ${ODOO_DB:-odoo}
       ODOO_LOGIN: ${ODOO_LOGIN:-admin}
       ODOO_PASSWORD: ${ODOO_PASSWORD}
+      MESSAGING_URL: ${MESSAGING_URL}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-zentria-internal-2026}
     networks:
       - zentria-net
       - odoo-internal
