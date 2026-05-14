@@ -1,0 +1,903 @@
+{
+  "name": "WhatsApp Incoming ? Odoo Chatter",
+  "description": null,
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp-incoming",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "59c86a27-0921-48f0-811b-63c6fddadda3",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1200,
+        0
+      ],
+      "webhookId": "7dfdae04-a9c4-4f26-a3bf-38a393904d23"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body;\n\nif (!body.chatId || !body.message) {\n  throw new Error('Missing chatId or message');\n}\n\n// Normalize phone: strip spaces, dashes, keep + prefix\nconst rawPhone = String(body.chatId || body.senderId || '').trim();\nconst phone = rawPhone.replace(/[\\s\\-().]/g, '');\n\nreturn [{\n  json: {\n    phone,\n    rawPhone,\n    senderId: body.senderId || rawPhone,\n    message:  body.message,\n    channel:  body.channel || 'whatsapp',\n    timestamp: body.timestamp || new Date().toISOString(),\n  }\n}];"
+      },
+      "id": "a5b365c0-eff6-4b56-9d92-ff5b8dec3a9c",
+      "name": "Normalize",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -960,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.ODOO_URL }}/web/session/authenticate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"jsonrpc\": \"2.0\", \"method\": \"call\", \"params\": { \"db\": \"odoo\", \"login\": \"admin\", \"password\": \"admin\" } }",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "f36a94ca-9290-4f15-bc9f-136ba7f8b9a7",
+      "name": "Odoo Auth",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -720,
+        0
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const cookie = ($json.headers['set-cookie'] || [''])[0].split(';')[0];\nconst norm = $('Normalize').item.json;\nreturn [{ json: { ...norm, cookie } }];"
+      },
+      "id": "5ac9d14e-5eae-43a0-8580-1072d54ae29f",
+      "name": "Store Cookie",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -480,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.ODOO_URL }}/web/dataset/call_kw",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Cookie",
+              "value": "={{ $json.cookie }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ jsonrpc: '2.0', method: 'call', params: { model: 'crm.lead', method: 'search_read', args: [[['phone', 'like', $json.phone]]], kwargs: { fields: ['id', 'name', 'phone', 'partner_id'], limit: 1, context: {} } } }) }}",
+        "options": {}
+      },
+      "id": "60ff957e-ba61-4146-a954-5353dc3e0491",
+      "name": "Find Lead by Phone",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -240,
+        0
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $('Store Cookie').item.json;\nconst result = ($json.result || []);\nconst lead = result[0] || null;\n\nreturn [{\n  json: {\n    ...prev,\n    leadId:    lead ? lead.id : null,\n    leadName:  lead ? lead.name : null,\n    partnerId: lead && lead.partner_id ? lead.partner_id[0] : null,\n    found:     !!lead,\n  }\n}];"
+      },
+      "id": "4da85054-6593-4b25-93fa-faabd4515ff2",
+      "name": "After Find",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "cond-found",
+              "leftValue": "={{ $json.found }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "830198ed-5625-47fd-ac67-9ecf5ced406d",
+      "name": "Lead Found?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Lead not found � try to find by res.partner mobile/phone\nconst prev = $('After Find').item.json;\n\nconst body = JSON.stringify({\n  jsonrpc: '2.0',\n  method: 'call',\n  params: {\n    model: 'res.partner',\n    method: 'search_read',\n    args: [[\n      '|',\n      ['phone', 'like', prev.phone],\n      ['mobile', 'like', prev.phone]\n    ]],\n    kwargs: { fields: ['id', 'name', 'phone', 'mobile'], limit: 1, context: {} }\n  }\n});\n\nreturn [{ json: { ...prev, searchBody: body } }];"
+      },
+      "id": "95116db2-4fa1-46e5-910c-e4ca40b7479e",
+      "name": "Build Partner Search",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.ODOO_URL }}/web/dataset/call_kw",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Cookie",
+              "value": "={{ $('After Find').item.json.cookie }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.searchBody }}",
+        "options": {}
+      },
+      "id": "ce30d123-5b88-467b-b071-e0b22e26e596",
+      "name": "Find Partner",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        200
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $('After Find').item.json;\nconst result = ($json.result || []);\nconst partner = result[0] || null;\n\nreturn [{\n  json: {\n    ...prev,\n    // If we found a partner, use it; otherwise we'll log to a fallback lead\n    partnerId:  partner ? partner.id : null,\n    partnerName: partner ? partner.name : prev.phone,\n    found: !!partner,\n  }\n}];"
+      },
+      "id": "52ea6199-0d61-47f5-9499-0953bb62aaf8",
+      "name": "After Partner",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build the chatter message body\n// Input can come from 'After Find' (lead found) or 'After Partner' (partner fallback)\nlet data;\ntry {\n  data = $('After Find').item.json;\n  if (!data.found) data = $('After Partner').item.json;\n} catch { \n  data = $input.item.json;\n}\n\nconst channelEmoji = { whatsapp: '??', telegram: '??', webchat: '??' };\nconst emoji = channelEmoji[data.channel] || '??';\n\nconst messageHtml = `<p>${emoji} <strong>Mensaje de WhatsApp</strong> (${data.phone})</p><p>${data.message.replace(/\\n/g, '<br/>')}</p><p><small>${new Date(data.timestamp).toLocaleString('es-ES')}</small></p>`;\n\n// Determine the model and id to post to\nlet model, resId;\nif (data.leadId) {\n  model = 'crm.lead';\n  resId = data.leadId;\n} else if (data.partnerId) {\n  model = 'res.partner';\n  resId = data.partnerId;\n} else {\n  // No lead, no partner � skip\n  return [{ json: { ...data, skip: true, reason: 'No lead or partner found for phone: ' + data.phone } }];\n}\n\nconst chatBody = JSON.stringify({\n  jsonrpc: '2.0',\n  method: 'call',\n  params: {\n    model,\n    method: 'message_post',\n    args: [resId],\n    kwargs: {\n      body: messageHtml,\n      message_type: 'comment',\n      subtype_xmlid: 'mail.mt_note',\n      \n      context: {}\n    }\n  }\n});\n\nreturn [{ json: { ...data, model, resId, chatBody, skip: false } }];"
+      },
+      "id": "5cacea78-4df7-43c5-8d87-7f991bdf481c",
+      "name": "Build Chatter Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "cond-skip",
+              "leftValue": "={{ $json.skip }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "389e35e3-056a-479e-84cb-209201204411",
+      "name": "Should Post?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.ODOO_URL }}/web/dataset/call_kw",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Cookie",
+              "value": "={{ $json.cookie }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.chatBody }}",
+        "options": {}
+      },
+      "id": "b06c1f77-4e65-4d73-8093-2fa0d3d7c29d",
+      "name": "Post to Chatter",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1680,
+        -128
+      ],
+      "onError": "continueErrorOutput"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize": {
+      "main": [
+        [
+          {
+            "node": "Odoo Auth",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Odoo Auth": {
+      "main": [
+        [
+          {
+            "node": "Store Cookie",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Cookie": {
+      "main": [
+        [
+          {
+            "node": "Find Lead by Phone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Lead by Phone": {
+      "main": [
+        [
+          {
+            "node": "After Find",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Find": {
+      "main": [
+        [
+          {
+            "node": "Lead Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lead Found?": {
+      "main": [
+        [
+          {
+            "node": "Build Chatter Message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build Partner Search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Partner Search": {
+      "main": [
+        [
+          {
+            "node": "Find Partner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Partner": {
+      "main": [
+        [
+          {
+            "node": "After Partner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Partner": {
+      "main": [
+        [
+          {
+            "node": "Build Chatter Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Chatter Message": {
+      "main": [
+        [
+          {
+            "node": "Should Post?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Should Post?": {
+      "main": [
+        [
+          {
+            "node": "Post to Chatter",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Post to Chatter": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "activeVersionId": "19c3b58b-d4e0-40e4-9d73-9eb4f8a4649b",
+  "versionCounter": 34,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-05-13T15:37:09.331Z",
+      "createdAt": "2026-05-13T15:37:09.331Z",
+      "role": "workflow:owner",
+      "workflowId": "mHSrBxcLxvgLrn60",
+      "projectId": "NicolasMartinezP1",
+      "project": {
+        "updatedAt": "2026-05-11T09:44:39.909Z",
+        "createdAt": "2026-05-11T09:44:39.909Z",
+        "id": "NicolasMartinezP1",
+        "name": "Nicolas Martinez",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "ee9ee570-2747-4067-a4fd-190ff52b0686"
+      }
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-05-14T09:48:42.148Z",
+    "createdAt": "2026-05-14T09:48:42.148Z",
+    "versionId": "19c3b58b-d4e0-40e4-9d73-9eb4f8a4649b",
+    "workflowId": "mHSrBxcLxvgLrn60",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "whatsapp-incoming",
+          "responseMode": "onReceived",
+          "options": {}
+        },
+        "id": "59c86a27-0921-48f0-811b-63c6fddadda3",
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          -1200,
+          0
+        ],
+        "webhookId": "7dfdae04-a9c4-4f26-a3bf-38a393904d23"
+      },
+      {
+        "parameters": {
+          "jsCode": "const body = $json.body;\n\nif (!body.chatId || !body.message) {\n  throw new Error('Missing chatId or message');\n}\n\n// Normalize phone: strip spaces, dashes, keep + prefix\nconst rawPhone = String(body.chatId || body.senderId || '').trim();\nconst phone = rawPhone.replace(/[\\s\\-().]/g, '');\n\nreturn [{\n  json: {\n    phone,\n    rawPhone,\n    senderId: body.senderId || rawPhone,\n    message:  body.message,\n    channel:  body.channel || 'whatsapp',\n    timestamp: body.timestamp || new Date().toISOString(),\n  }\n}];"
+        },
+        "id": "a5b365c0-eff6-4b56-9d92-ff5b8dec3a9c",
+        "name": "Normalize",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -960,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "={{ $env.ODOO_URL }}/web/session/authenticate",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={ \"jsonrpc\": \"2.0\", \"method\": \"call\", \"params\": { \"db\": \"odoo\", \"login\": \"admin\", \"password\": \"admin\" } }",
+          "options": {
+            "response": {
+              "response": {
+                "fullResponse": true,
+                "responseFormat": "json"
+              }
+            }
+          }
+        },
+        "id": "f36a94ca-9290-4f15-bc9f-136ba7f8b9a7",
+        "name": "Odoo Auth",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          -720,
+          0
+        ],
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "jsCode": "const cookie = ($json.headers['set-cookie'] || [''])[0].split(';')[0];\nconst norm = $('Normalize').item.json;\nreturn [{ json: { ...norm, cookie } }];"
+        },
+        "id": "5ac9d14e-5eae-43a0-8580-1072d54ae29f",
+        "name": "Store Cookie",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -480,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "={{ $env.ODOO_URL }}/web/dataset/call_kw",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Cookie",
+                "value": "={{ $json.cookie }}"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ jsonrpc: '2.0', method: 'call', params: { model: 'crm.lead', method: 'search_read', args: [[['phone', 'like', $json.phone]]], kwargs: { fields: ['id', 'name', 'phone', 'partner_id'], limit: 1, context: {} } } }) }}",
+          "options": {}
+        },
+        "id": "60ff957e-ba61-4146-a954-5353dc3e0491",
+        "name": "Find Lead by Phone",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          -240,
+          0
+        ],
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "jsCode": "const prev = $('Store Cookie').item.json;\nconst result = ($json.result || []);\nconst lead = result[0] || null;\n\nreturn [{\n  json: {\n    ...prev,\n    leadId:    lead ? lead.id : null,\n    leadName:  lead ? lead.name : null,\n    partnerId: lead && lead.partner_id ? lead.partner_id[0] : null,\n    found:     !!lead,\n  }\n}];"
+        },
+        "id": "4da85054-6593-4b25-93fa-faabd4515ff2",
+        "name": "After Find",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          0,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": false,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 1
+            },
+            "conditions": [
+              {
+                "id": "cond-found",
+                "leftValue": "={{ $json.found }}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "830198ed-5625-47fd-ac67-9ecf5ced406d",
+        "name": "Lead Found?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          240,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "// Lead not found � try to find by res.partner mobile/phone\nconst prev = $('After Find').item.json;\n\nconst body = JSON.stringify({\n  jsonrpc: '2.0',\n  method: 'call',\n  params: {\n    model: 'res.partner',\n    method: 'search_read',\n    args: [[\n      '|',\n      ['phone', 'like', prev.phone],\n      ['mobile', 'like', prev.phone]\n    ]],\n    kwargs: { fields: ['id', 'name', 'phone', 'mobile'], limit: 1, context: {} }\n  }\n});\n\nreturn [{ json: { ...prev, searchBody: body } }];"
+        },
+        "id": "95116db2-4fa1-46e5-910c-e4ca40b7479e",
+        "name": "Build Partner Search",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          480,
+          200
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "={{ $env.ODOO_URL }}/web/dataset/call_kw",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Cookie",
+                "value": "={{ $('After Find').item.json.cookie }}"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ $json.searchBody }}",
+          "options": {}
+        },
+        "id": "ce30d123-5b88-467b-b071-e0b22e26e596",
+        "name": "Find Partner",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          720,
+          200
+        ],
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "jsCode": "const prev = $('After Find').item.json;\nconst result = ($json.result || []);\nconst partner = result[0] || null;\n\nreturn [{\n  json: {\n    ...prev,\n    // If we found a partner, use it; otherwise we'll log to a fallback lead\n    partnerId:  partner ? partner.id : null,\n    partnerName: partner ? partner.name : prev.phone,\n    found: !!partner,\n  }\n}];"
+        },
+        "id": "52ea6199-0d61-47f5-9499-0953bb62aaf8",
+        "name": "After Partner",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          960,
+          200
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "// Build the chatter message body\n// Input can come from 'After Find' (lead found) or 'After Partner' (partner fallback)\nlet data;\ntry {\n  data = $('After Find').item.json;\n  if (!data.found) data = $('After Partner').item.json;\n} catch { \n  data = $input.item.json;\n}\n\nconst channelEmoji = { whatsapp: '??', telegram: '??', webchat: '??' };\nconst emoji = channelEmoji[data.channel] || '??';\n\nconst messageHtml = `<p>${emoji} <strong>Mensaje de WhatsApp</strong> (${data.phone})</p><p>${data.message.replace(/\\n/g, '<br/>')}</p><p><small>${new Date(data.timestamp).toLocaleString('es-ES')}</small></p>`;\n\n// Determine the model and id to post to\nlet model, resId;\nif (data.leadId) {\n  model = 'crm.lead';\n  resId = data.leadId;\n} else if (data.partnerId) {\n  model = 'res.partner';\n  resId = data.partnerId;\n} else {\n  // No lead, no partner � skip\n  return [{ json: { ...data, skip: true, reason: 'No lead or partner found for phone: ' + data.phone } }];\n}\n\nconst chatBody = JSON.stringify({\n  jsonrpc: '2.0',\n  method: 'call',\n  params: {\n    model,\n    method: 'message_post',\n    args: [resId],\n    kwargs: {\n      body: messageHtml,\n      message_type: 'comment',\n      subtype_xmlid: 'mail.mt_note',\n      \n      context: {}\n    }\n  }\n});\n\nreturn [{ json: { ...data, model, resId, chatBody, skip: false } }];"
+        },
+        "id": "5cacea78-4df7-43c5-8d87-7f991bdf481c",
+        "name": "Build Chatter Message",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1200,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": false,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 1
+            },
+            "conditions": [
+              {
+                "id": "cond-skip",
+                "leftValue": "={{ $json.skip }}",
+                "rightValue": false,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "389e35e3-056a-479e-84cb-209201204411",
+        "name": "Should Post?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          1440,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "={{ $env.ODOO_URL }}/web/dataset/call_kw",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Cookie",
+                "value": "={{ $json.cookie }}"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ $json.chatBody }}",
+          "options": {}
+        },
+        "id": "b06c1f77-4e65-4d73-8093-2fa0d3d7c29d",
+        "name": "Post to Chatter",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1680,
+          -128
+        ],
+        "onError": "continueErrorOutput"
+      }
+    ],
+    "connections": {
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "Normalize",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Normalize": {
+        "main": [
+          [
+            {
+              "node": "Odoo Auth",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Odoo Auth": {
+        "main": [
+          [
+            {
+              "node": "Store Cookie",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Store Cookie": {
+        "main": [
+          [
+            {
+              "node": "Find Lead by Phone",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Find Lead by Phone": {
+        "main": [
+          [
+            {
+              "node": "After Find",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "After Find": {
+        "main": [
+          [
+            {
+              "node": "Lead Found?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Lead Found?": {
+        "main": [
+          [
+            {
+              "node": "Build Chatter Message",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Build Partner Search",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build Partner Search": {
+        "main": [
+          [
+            {
+              "node": "Find Partner",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Find Partner": {
+        "main": [
+          [
+            {
+              "node": "After Partner",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "After Partner": {
+        "main": [
+          [
+            {
+              "node": "Build Chatter Message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build Chatter Message": {
+        "main": [
+          [
+            {
+              "node": "Should Post?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Should Post?": {
+        "main": [
+          [
+            {
+              "node": "Post to Chatter",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          []
+        ]
+      },
+      "Post to Chatter": {
+        "main": [
+          []
+        ]
+      }
+    },
+    "authors": "Nicolas Martinez",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-05-14T09:48:42.207Z",
+        "id": 38,
+        "workflowId": "mHSrBxcLxvgLrn60",
+        "versionId": "19c3b58b-d4e0-40e4-9d73-9eb4f8a4649b",
+        "event": "deactivated",
+        "userId": "ee9ee570-2747-4067-a4fd-190ff52b0686"
+      },
+      {
+        "createdAt": "2026-05-14T09:48:42.227Z",
+        "id": 39,
+        "workflowId": "mHSrBxcLxvgLrn60",
+        "versionId": "19c3b58b-d4e0-40e4-9d73-9eb4f8a4649b",
+        "event": "activated",
+        "userId": "ee9ee570-2747-4067-a4fd-190ff52b0686"
+      }
+    ]
+  }
+}
